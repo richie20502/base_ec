@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TrackingController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -10,3 +13,5 @@
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::post('/ruta-prueba',[TrackingController::class, 'quotation'])->name('ruta.prueba');

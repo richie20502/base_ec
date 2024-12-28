@@ -1,3 +1,4 @@
+
 <div class="customer-address-payment-form">
     <input type="hidden" name="update-tax-url" id="update-checkout-tax-url"
         value="{{ route('public.ajax.checkout.update-tax') }}">
@@ -271,7 +272,7 @@
                         { id: '#address_phone', value: $('#address_phone').val(), label: 'Phone' }
                     ];
 
-                    // Validate fields
+                    /*
                     fields.forEach(field => {
                         if (!field.value) {
                             $(field.id).addClass('is-invalid');
@@ -284,13 +285,13 @@
                     if (hasError) {
                         $('#quote-message').html('<span class="text-danger">Por favor complete todos los campos requeridos.</span>');
                         return;
-                    }
+                    }*/
 
                     $('#quote-message').html('<span class="text-info">Procesando su solicitud...</span>');
 
-                    /*
+                    
                     $.ajax({
-                        url: '/get-shipping-quote',
+                        url: "{{ route('ruta.prueba')}}",
                         type: 'POST',
                         data: {
                             fullName: $('#address_name').val(),
@@ -307,7 +308,7 @@
                         error: function (xhr) {
                             $('#quote-message').html(`<span class="text-danger">Error: ${xhr.responseJSON.message}</span>`);
                         }
-                    });*/
+                    });
                 }
             });
         });
