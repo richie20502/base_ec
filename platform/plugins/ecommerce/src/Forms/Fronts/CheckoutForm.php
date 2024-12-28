@@ -25,6 +25,8 @@ class CheckoutForm extends FormFront
         $model = $this->getModel();
         $token = $model['token'];
 
+        //dd($model);
+
         $this
             ->contentOnly()
             ->setUrl(route('public.checkout.process', $token))
@@ -121,7 +123,7 @@ class CheckoutForm extends FormFront
                                                         ->add(
                                                             'shipping_address_form',
                                                             HtmlField::class,
-                                                            HtmlFieldOption::make()->content(view('plugins/ecommerce::orders.partials.address-form', $model))
+                                                            HtmlFieldOption::make()->content(view('plugins/ecommerce::orders.partials.address-form',$model))
                                                         );
                                                 },
                                             )
@@ -132,6 +134,7 @@ class CheckoutForm extends FormFront
                                             );
                                     })
                                     ->when(EcommerceHelper::isBillingAddressEnabled(), function (CheckoutForm $form) use ($model): void {
+                                        
                                         $form
                                             ->addWrapper(
                                                 'billing_information_wrapper',

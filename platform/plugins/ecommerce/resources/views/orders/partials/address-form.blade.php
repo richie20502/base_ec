@@ -1,4 +1,3 @@
-
 <div class="customer-address-payment-form">
     <input type="hidden" name="update-tax-url" id="update-checkout-tax-url"
         value="{{ route('public.ajax.checkout.update-tax') }}">
@@ -239,6 +238,53 @@
             </div>
         @endif
     </div>
+
+    <!-- inicio Form Products -->
+    <div class="products-wrapper">
+        @foreach ($products as $index => $product)
+            <div class="product-item border rounded p-3 mb-4">
+                <h4>Product {{ $index + 1 }}</h4>
+
+                {{-- Campos del Producto --}}
+                <input type="hidden" class="product-id" value="{{ $product['id'] ?? null }}">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <label>Name:</label>
+                        <input type="text" class="form-control product-name" value="{{ $product['name'] }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label>SKU:</label>
+                        <input type="text" class="form-control product-sku" value="{{ $product['sku'] }}">
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <label>Description:</label>
+                        <textarea class="form-control product-description">{{ $product['description'] }}</textarea>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <label>Price:</label>
+                        <input type="number" step="0.01" class="form-control product-price" value="{{ $product['price'] }}"
+                            required>
+                    </div>
+                    <div class="col-md-6">
+                        <label>Quantity:</label>
+                        <input type="number" class="form-control product-quantity" value="{{ $product['quantity'] }}">
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
+    <!-- fin Form products -->
+
+
+
     <!-- AQUI -->
 
     <div id="additional-info-wrapper" class="mb-3">
@@ -289,7 +335,7 @@
 
                     $('#quote-message').html('<span class="text-info">Procesando su solicitud...</span>');
 
-                    
+
                     $.ajax({
                         url: "{{ route('ruta.prueba')}}",
                         type: 'POST',
