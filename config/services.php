@@ -34,5 +34,10 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'skydropx' => [
+        'auth_url' => env('SKYDROPX_AUTH_URL'),
+        'client_id' => env('SKYDROPX_CLIENT_ID'),
+        'client_secret' => env('SKYDROPX_CLIENT_SECRET'),
+    ],
 
 ];

@@ -52,7 +52,9 @@
             </div>
 
             <div class="p-3">
+                
                 @foreach ($grouped['products'] as $product)
+                
                     @include('plugins/ecommerce::orders.checkout.product', [
                         'product' => $product,
                         'cartItem' => $product->cartItem,

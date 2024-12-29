@@ -240,41 +240,14 @@
     </div>
 
     <!-- inicio Form Products -->
-    <div class="products-wrapper">
+    <div class="products-wrapper" style="display:none;">
         @foreach ($products as $index => $product)
             <div class="product-item border rounded p-3 mb-4">
-                <h4>Product {{ $index + 1 }}</h4>
-
-                {{-- Campos del Producto --}}
                 <input type="hidden" class="product-id" value="{{ $product['id'] ?? null }}">
-
                 <div class="row">
                     <div class="col-md-6">
-                        <label>Name:</label>
-                        <input type="text" class="form-control product-name" value="{{ $product['name'] }}" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label>SKU:</label>
-                        <input type="text" class="form-control product-sku" value="{{ $product['sku'] }}">
-                    </div>
-                </div>
-
-                <div class="row mt-3">
-                    <div class="col-md-12">
-                        <label>Description:</label>
-                        <textarea class="form-control product-description">{{ $product['description'] }}</textarea>
-                    </div>
-                </div>
-
-                <div class="row mt-3">
-                    <div class="col-md-6">
-                        <label>Price:</label>
-                        <input type="number" step="0.01" class="form-control product-price" value="{{ $product['price'] }}"
-                            required>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Quantity:</label>
-                        <input type="number" class="form-control product-quantity" value="{{ $product['quantity'] }}">
+                        <label>id:</label>
+                        <input type="text" class="form-control product-id" value="{{ $product['id'] }}" required>
                     </div>
                 </div>
             </div>
@@ -292,7 +265,9 @@
             <span id="toggle-icon" class="me-2">+</span>{{ __('Cotizador Envío') }}
         </button>
         <div id="additional-info-content" class="p-3 border rounded mt-2 d-none bg-light">
-            <p id="quote-message" class="text-info">{{ __('Your shipping quote will appear here.') }}</p>
+            <div id="quote-content">
+                <p id="quote-message" class="text-info">{{ __('Your shipping quote will appear here.') }}</p>
+            </div>
         </div>
     </div>
 
@@ -335,6 +310,22 @@
 
                     $('#quote-message').html('<span class="text-info">Procesando su solicitud...</span>');
 
+                    let products = [];
+
+                    // Iterar sobre cada producto en el formulario
+                    $('.product-item').each(function () {
+                        let product = {
+                            id: $(this).find('.product-id').val(),
+                            name: $(this).find('.product-name').val(),
+                            sku: $(this).find('.product-sku').val(),
+                            description: $(this).find('.product-description').val(),
+                            price: $(this).find('.product-price').val(),
+                            quantity: $(this).find('.product-quantity').val(),
+                        };
+
+                        products.push(product);
+                    });
+
 
                     $.ajax({
                         url: "{{ route('ruta.prueba')}}",
@@ -346,9 +337,16 @@
                             city: $('#address_city').val(),
                             address: $('#address_address').val(),
                             zipCode: $('#address_zip_code').val(),
-                            _token: $('meta[name="csrf-token"]').attr('content') // For CSRF token
+                            phone: $('#address_phone').val(),
+                            _token: $('meta[name="csrf-token"]').attr('content'),
+                            products: products
                         },
                         success: function (response) {
+                            console.log(response);
+
+                            if (response.data.rates) {
+                                renderQuoteContent(response.data.rates);
+                            }
                             $('#quote-message').html(`<span class="text-success">${response.message}</span>`);
                         },
                         error: function (xhr) {
@@ -358,6 +356,41 @@
                 }
             });
         });
+
+
+        function renderQuoteContent(rates) {
+            const contentContainer = document.getElementById('quote-content');
+            contentContainer.innerHTML = ''; // Limpia el contenido previo
+
+            // Filtrar rates disponibles (success === true)
+            const availableRates = rates.filter(rate => rate.success);
+
+            if (availableRates.length === 0) {
+                contentContainer.innerHTML = '<p class="text-danger">No hay tarifas disponibles.</p>';
+                return;
+            }
+
+            availableRates.forEach((rate, index) => {
+                const rateCard = document.createElement('div');
+                rateCard.className = 'mb-3 border p-3 rounded bg-white d-flex align-items-center';
+
+                rateCard.innerHTML = `
+            <div class="form-check me-3">
+                <input class="form-check-input" type="checkbox" id="rate-${index}" name="rateSelection" value="${rate.id}">
+            </div>
+            <div>
+                <h5 class="text-primary">${rate.provider_name}</h5>
+                <p><strong>Días:</strong> ${rate.days ?? 'No especificado'}</p>
+                <p><strong>Precio:</strong> ${rate.amount ?? 'No disponible'}</p>
+            </div>
+        `;
+
+                contentContainer.appendChild(rateCard);
+            });
+
+            // Hacer visible el contenedor
+            document.getElementById('additional-info-content').classList.remove('d-none');
+        }
 
     </script>
     <style>
