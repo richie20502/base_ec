@@ -293,7 +293,7 @@
                         { id: '#address_phone', value: $('#address_phone').val(), label: 'Phone' }
                     ];
 
-                    /*
+                    
                     fields.forEach(field => {
                         if (!field.value) {
                             $(field.id).addClass('is-invalid');
@@ -306,7 +306,7 @@
                     if (hasError) {
                         $('#quote-message').html('<span class="text-danger">Por favor complete todos los campos requeridos.</span>');
                         return;
-                    }*/
+                    }
 
                     $('#quote-message').html('<span class="text-info">Procesando su solicitud...</span>');
 

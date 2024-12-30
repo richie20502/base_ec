@@ -168,11 +168,12 @@ class CheckoutForm extends FormFront
                                                 '</div>',
                                                 function (CheckoutForm $form) use ($model): void {
                                                     $form
+                                                    /*
                                                         ->add(
                                                             'shipping_method_title',
                                                             HtmlField::class,
                                                             HtmlFieldOption::make()->content('<h5 class="checkout-payment-title">' . __('Shipping method') . '</h5>')
-                                                        )
+                                                        )*/
                                                         ->add(
                                                             'shipping_method_loading',
                                                             HtmlField::class,
