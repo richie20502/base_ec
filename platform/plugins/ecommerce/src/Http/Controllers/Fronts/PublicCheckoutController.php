@@ -537,6 +537,7 @@ class PublicCheckoutController extends BaseController
         HandleRemoveCouponService $removeCouponService,
         HandleApplyPromotionsService $handleApplyPromotionsService
     ) {
+        dd($request->all());
         abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
         if (! EcommerceHelper::isEnabledGuestCheckout() && ! auth('customer')->check()) {
@@ -876,6 +877,8 @@ class PublicCheckoutController extends BaseController
 
     public function getCheckoutSuccess(string $token)
     {
+
+        
         abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
         /**

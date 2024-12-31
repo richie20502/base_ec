@@ -4,8 +4,7 @@
     <div class="mb-3 form-group">
         @if (auth('customer')->check())
             <p>{{ __('Account') }}: <strong>{{ auth('customer')->user()->name }}</strong> -
-                {!! Html::email(auth('customer')->user()->email) !!} (<a
-                    href="{{ route('customer.logout') }}">{{ __('Logout') }})</a>
+                {!! Html::email(auth('customer')->user()->email) !!} (<a href="{{ route('customer.logout') }}">{{ __('Logout') }})</a>
             </p>
         @else
             <p>{{ __('Already have an account?') }} <a href="{{ route('customer.login') }}">{{ __('Login') }}</a></p>
@@ -39,39 +38,37 @@
                 <br>
                 <div class="address-item-selected @if (!$sessionAddressId) d-none @endif">
                     @if ($isAvailableAddress && $oldSessionAddressId != 'new')
-                            @if ($oldSessionAddressId && $addresses->contains('id', $oldSessionAddressId))
-                                    @include('plugins/ecommerce::orders.partials.address-item', [
-                                    'address' => $addresses->firstWhere('id', $oldSessionAddressId),
-                                ])
-                            @elseif ($defaultAddress = get_default_customer_address())
-                                    @include('plugins/ecommerce::orders.partials.address-item', [
-                                    'address' => $defaultAddress,
-                                ])
-                            @else
-                                    @include('plugins/ecommerce::orders.partials.address-item', [
-                                    'address' => Arr::first($addresses),
-                                ])
-                            @endif
+                        @if ($oldSessionAddressId && $addresses->contains('id', $oldSessionAddressId))
+                            @include('plugins/ecommerce::orders.partials.address-item', [
+                                'address' => $addresses->firstWhere('id', $oldSessionAddressId),
+                            ])
+                        @elseif ($defaultAddress = get_default_customer_address())
+                            @include('plugins/ecommerce::orders.partials.address-item', [
+                                'address' => $defaultAddress,
+                            ])
+                        @else
+                            @include('plugins/ecommerce::orders.partials.address-item', [
+                                'address' => Arr::first($addresses),
+                            ])
+                        @endif
                     @endif
                 </div>
                 <div class="list-available-address d-none">
                     @if ($isAvailableAddress)
-                            @foreach ($addresses as $address)
-                                    <div class="address-item-wrapper" data-id="{{ $address->id }}">
-                                        @include(
+                        @foreach ($addresses as $address)
+                            <div class="address-item-wrapper" data-id="{{ $address->id }}">
+                                @include(
                                     'plugins/ecommerce::orders.partials.address-item',
-                                    compact('address')
-                                )
-                                    </div>
-                            @endforeach
+                                    compact('address'))
+                            </div>
+                        @endforeach
                     @endif
                 </div>
             </div>
         </div>
     @endauth
 
-    <div
-        class="address-form-wrapper @if (auth('customer')->check() && $oldSessionAddressId !== 'new' && $isAvailableAddress) d-none @endif">
+    <div class="address-form-wrapper @if (auth('customer')->check() && $oldSessionAddressId !== 'new' && $isAvailableAddress) d-none @endif">
         <div class="form-group mb-3 @error('address.name') has-error @enderror">
             <div class="form-input-wrapper">
                 <input class="form-control" id="address_name" name="address[name]" autocomplete="family-name"
@@ -85,43 +82,41 @@
 
         <div class="row">
             @if (!in_array('email', EcommerceHelper::getHiddenFieldsAtCheckout()))
-                        <div @class([
+                <div @class([
                     'col-12',
                     'col-lg-8' => !in_array(
                         'phone',
-                        EcommerceHelper::getHiddenFieldsAtCheckout()
-                    ),
+                        EcommerceHelper::getHiddenFieldsAtCheckout()),
                 ])>
-                            <div class="form-group mb-3 @error('address.email') has-error @enderror">
-                                <div class="form-input-wrapper">
-                                    <input class="form-control" id="address_email" name="address[email]" autocomplete="email"
-                                        type="email"
-                                        value="{{ old('address.email', Arr::get($sessionCheckoutData, 'email')) ?: (auth('customer')->check() ? auth('customer')->user()->email : null) }}"
-                                        required>
-                                    <label for="address_email">{{ __('Email') }}</label>
-                                </div>
-                                {!! Form::error('address.email', $errors) !!}
-                            </div>
+                    <div class="form-group mb-3 @error('address.email') has-error @enderror">
+                        <div class="form-input-wrapper">
+                            <input class="form-control" id="address_email" name="address[email]" autocomplete="email"
+                                type="email"
+                                value="{{ old('address.email', Arr::get($sessionCheckoutData, 'email')) ?: (auth('customer')->check() ? auth('customer')->user()->email : null) }}"
+                                required>
+                            <label for="address_email">{{ __('Email') }}</label>
                         </div>
+                        {!! Form::error('address.email', $errors) !!}
+                    </div>
+                </div>
             @endif
             @if (!in_array('phone', EcommerceHelper::getHiddenFieldsAtCheckout()))
-                        <div @class([
+                <div @class([
                     'col-12',
                     'col-lg-4' => !in_array(
                         'email',
-                        EcommerceHelper::getHiddenFieldsAtCheckout()
-                    ),
+                        EcommerceHelper::getHiddenFieldsAtCheckout()),
                 ])>
-                            <div class="form-group mb-3 @error('address.phone') has-error @enderror">
-                                <div class="form-input-wrapper">
-                                    <input class="form-control" id="address_phone" name="address[phone]" autocomplete="phone"
-                                        type="tel"
-                                        value="{{ old('address.phone', Arr::get($sessionCheckoutData, 'phone')) ?: (auth('customer')->check() ? auth('customer')->user()->phone : null) }}">
-                                    <label for="address_phone">{{ __('Phone') }}</label>
-                                </div>
-                                {!! Form::error('address.phone', $errors) !!}
-                            </div>
+                    <div class="form-group mb-3 @error('address.phone') has-error @enderror">
+                        <div class="form-input-wrapper">
+                            <input class="form-control" id="address_phone" name="address[phone]" autocomplete="phone"
+                                type="tel"
+                                value="{{ old('address.phone', Arr::get($sessionCheckoutData, 'phone')) ?: (auth('customer')->check() ? auth('customer')->user()->phone : null) }}">
+                            <label for="address_phone">{{ __('Phone') }}</label>
                         </div>
+                        {!! Form::error('address.phone', $errors) !!}
+                    </div>
+                </div>
             @endif
         </div>
 
@@ -154,13 +149,16 @@
                     <div class="form-group mb-3 @error('address.state') has-error @enderror">
                         @if (EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation())
                             <div class="select--arrow form-input-wrapper">
-                                <select class="form-control" id="address_state" name="address[state]" autocomplete="state"
-                                    data-form-parent=".customer-address-payment-form" data-type="state"
-                                    data-url="{{ route('ajax.states-by-country') }}" required>
+                                <select class="form-control" id="address_state" name="address[state]"
+                                    autocomplete="state" data-form-parent=".customer-address-payment-form"
+                                    data-type="state" data-url="{{ route('ajax.states-by-country') }}" required>
                                     <option value="">{{ __('Select state...') }}</option>
-                                    @if (old('address.country', Arr::get($sessionCheckoutData, 'country') ?: EcommerceHelper::getDefaultCountryId()) || !EcommerceHelper::isUsingInMultipleCountries())
+                                    @if (old('address.country', Arr::get($sessionCheckoutData, 'country') ?: EcommerceHelper::getDefaultCountryId()) ||
+                                            !EcommerceHelper::isUsingInMultipleCountries())
                                         @foreach (EcommerceHelper::getAvailableStatesByCountry(old('address.country', Arr::get($sessionCheckoutData, 'country') ?: EcommerceHelper::getDefaultCountryId())) as $stateId => $stateName)
-                                            <option value="{{ $stateId }}" @if (old('address.state', Arr::get($sessionCheckoutData, 'state')) == $stateId) selected @endif>{{ $stateName }}</option>
+                                            <option value="{{ $stateId }}"
+                                                @if (old('address.state', Arr::get($sessionCheckoutData, 'state')) == $stateId) selected @endif>{{ $stateName }}
+                                            </option>
                                         @endforeach
                                     @endif
                                 </select>
@@ -169,8 +167,9 @@
                             </div>
                         @else
                             <div class="form-input-wrapper">
-                                <input class="form-control" id="address_state" name="address[state]" autocomplete="state"
-                                    type="text" value="{{ old('address.state', Arr::get($sessionCheckoutData, 'state')) }}"
+                                <input class="form-control" id="address_state" name="address[state]"
+                                    autocomplete="state" type="text"
+                                    value="{{ old('address.state', Arr::get($sessionCheckoutData, 'state')) }}"
                                     required>
                                 <label for="address_state">{{ __('State') }}</label>
                             </div>
@@ -181,24 +180,32 @@
             @endif
 
             @if (!in_array('city', EcommerceHelper::getHiddenFieldsAtCheckout()))
-                <div @class(['col-sm-6 col-12' => !in_array('state', EcommerceHelper::getHiddenFieldsAtCheckout()), 'col-12' => in_array('state', EcommerceHelper::getHiddenFieldsAtCheckout())])>
+                <div @class([
+                    'col-sm-6 col-12' => !in_array(
+                        'state',
+                        EcommerceHelper::getHiddenFieldsAtCheckout()),
+                    'col-12' => in_array('state', EcommerceHelper::getHiddenFieldsAtCheckout()),
+                ])>
                     <div class="form-group mb-3 @error('address.city') has-error @enderror">
                         @if (EcommerceHelper::useCityFieldAsTextField())
                             <div class="form-input-wrapper">
                                 <input class="form-control" id="address_city" name="address[city]" autocomplete="city"
-                                    type="text" value="{{ old('address.city', Arr::get($sessionCheckoutData, 'city')) }}"
-                                    required>
+                                    type="text"
+                                    value="{{ old('address.city', Arr::get($sessionCheckoutData, 'city')) }}" required>
                                 <label for="address_city">{{ __('City') }}</label>
                             </div>
                         @else
                             <div class="select--arrow form-input-wrapper">
-                                <select class="form-control" id="address_city" name="address[city]" autocomplete="city"
-                                    data-type="city" data-using-select2="false" data-url="{{ route('ajax.cities-by-state') }}"
-                                    required>
+                                <select class="form-control" id="address_city" name="address[city]"
+                                    autocomplete="city" data-type="city" data-using-select2="false"
+                                    data-url="{{ route('ajax.cities-by-state') }}" required>
                                     <option value="">{{ __('Select city...') }}</option>
-                                    @if (old('address.state', Arr::get($sessionCheckoutData, 'state')) || in_array('state', EcommerceHelper::getHiddenFieldsAtCheckout()))
+                                    @if (old('address.state', Arr::get($sessionCheckoutData, 'state')) ||
+                                            in_array('state', EcommerceHelper::getHiddenFieldsAtCheckout()))
                                         @foreach (EcommerceHelper::getAvailableCitiesByState(old('address.state', Arr::get($sessionCheckoutData, 'state')), old('address.country', Arr::get($sessionCheckoutData, 'country'))) as $cityId => $cityName)
-                                            <option value="{{ $cityId }}" @if (old('address.city', Arr::get($sessionCheckoutData, 'city')) == $cityId) selected @endif>{{ $cityName }}</option>
+                                            <option value="{{ $cityId }}"
+                                                @if (old('address.city', Arr::get($sessionCheckoutData, 'city')) == $cityId) selected @endif>{{ $cityName }}
+                                            </option>
                                         @endforeach
                                     @endif
                                 </select>
@@ -218,8 +225,8 @@
             <div class="form-group mb-3 @error('address.address') has-error @enderror">
                 <div class="form-input-wrapper">
                     <input class="form-control" id="address_address" name="address[address]" autocomplete="address"
-                        type="text" value="{{ old('address.address', Arr::get($sessionCheckoutData, 'address')) }}"
-                        required>
+                        type="text"
+                        value="{{ old('address.address', Arr::get($sessionCheckoutData, 'address')) }}" required>
                     <label for="address_address">{{ __('Address') }}</label>
                 </div>
                 {!! Form::error('address.address', $errors) !!}
@@ -229,9 +236,9 @@
         @if (EcommerceHelper::isZipCodeEnabled())
             <div class="form-group mb-3 @error('address.zip_code') has-error @enderror">
                 <div class="form-input-wrapper">
-                    <input class="form-control" id="address_zip_code" name="address[zip_code]" autocomplete="postal-code"
-                        type="text" value="{{ old('address.zip_code', Arr::get($sessionCheckoutData, 'zip_code')) }}"
-                        required>
+                    <input class="form-control" id="address_zip_code" name="address[zip_code]"
+                        autocomplete="postal-code" type="text"
+                        value="{{ old('address.zip_code', Arr::get($sessionCheckoutData, 'zip_code')) }}" required>
                     <label for="address_zip_code">{{ __('Zip code') }}</label>
                 </div>
                 {!! Form::error('address.zip_code', $errors) !!}
@@ -268,12 +275,14 @@
             <div id="quote-content">
                 <p id="quote-message" class="text-info">{{ __('Your shipping quote will appear here.') }}</p>
             </div>
+            <div id="additional-checkboxes"></div>
+            <div id="additional-info-content" class="d-none"></div>
         </div>
     </div>
 
     <script>
-        $(document).ready(function () {
-            $('#toggle-additional-info').on('click', function () {
+        $(document).ready(function() {
+            $('#toggle-additional-info').on('click', function() {
                 // Toggle the visibility of the content
                 $('#additional-info-content').toggleClass('d-none');
                 const isHidden = $('#additional-info-content').hasClass('d-none');
@@ -283,17 +292,44 @@
                     // Gather form values and validate
                     let hasError = false;
 
-                    const fields = [
-                        { id: '#address_name', value: $('#address_name').val(), label: 'Full Name' },
-                        { id: '#address_email', value: $('#address_email').val(), label: 'Email' },
-                        { id: '#address_state', value: $('#address_state').val(), label: 'State' },
-                        { id: '#address_city', value: $('#address_city').val(), label: 'City' },
-                        { id: '#address_address', value: $('#address_address').val(), label: 'Address' },
-                        { id: '#address_zip_code', value: $('#address_zip_code').val(), label: 'Zip Code' },
-                        { id: '#address_phone', value: $('#address_phone').val(), label: 'Phone' }
+                    const fields = [{
+                            id: '#address_name',
+                            value: $('#address_name').val(),
+                            label: 'Full Name'
+                        },
+                        {
+                            id: '#address_email',
+                            value: $('#address_email').val(),
+                            label: 'Email'
+                        },
+                        {
+                            id: '#address_state',
+                            value: $('#address_state').val(),
+                            label: 'State'
+                        },
+                        {
+                            id: '#address_city',
+                            value: $('#address_city').val(),
+                            label: 'City'
+                        },
+                        {
+                            id: '#address_address',
+                            value: $('#address_address').val(),
+                            label: 'Address'
+                        },
+                        {
+                            id: '#address_zip_code',
+                            value: $('#address_zip_code').val(),
+                            label: 'Zip Code'
+                        },
+                        {
+                            id: '#address_phone',
+                            value: $('#address_phone').val(),
+                            label: 'Phone'
+                        }
                     ];
 
-                    
+
                     fields.forEach(field => {
                         if (!field.value) {
                             $(field.id).addClass('is-invalid');
@@ -304,7 +340,9 @@
                     });
 
                     if (hasError) {
-                        $('#quote-message').html('<span class="text-danger">Por favor complete todos los campos requeridos.</span>');
+                        $('#quote-message').html(
+                            '<span class="text-danger">Por favor complete todos los campos requeridos.</span>'
+                            );
                         return;
                     }
 
@@ -313,7 +351,7 @@
                     let products = [];
 
                     // Iterar sobre cada producto en el formulario
-                    $('.product-item').each(function () {
+                    $('.product-item').each(function() {
                         let product = {
                             id: $(this).find('.product-id').val(),
                             name: $(this).find('.product-name').val(),
@@ -328,7 +366,7 @@
 
 
                     $.ajax({
-                        url: "{{ route('ruta.prueba')}}",
+                        url: "{{ route('ruta.prueba') }}",
                         type: 'POST',
                         data: {
                             fullName: $('#address_name').val(),
@@ -341,16 +379,20 @@
                             _token: $('meta[name="csrf-token"]').attr('content'),
                             products: products
                         },
-                        success: function (response) {
+                        success: function(response) {
                             console.log(response);
 
                             if (response.data.rates) {
-                                renderQuoteContent(response.data.rates);
+                                console.log(response.data.id)
+                                renderQuoteContent(response.data.rates, response.data.id);
                             }
-                            $('#quote-message').html(`<span class="text-success">${response.message}</span>`);
+                            $('#quote-message').html(
+                                `<span class="text-success">${response.message}</span>`);
                         },
-                        error: function (xhr) {
-                            $('#quote-message').html(`<span class="text-danger">Error: ${xhr.responseJSON.message}</span>`);
+                        error: function(xhr) {
+                            $('#quote-message').html(
+                                `<span class="text-danger">Error: ${xhr.responseJSON.message}</span>`
+                                );
                         }
                     });
                 }
@@ -358,7 +400,7 @@
         });
 
 
-        function renderQuoteContent(rates) {
+        function renderQuoteContent(rates, id) {
             const contentContainer = document.getElementById('quote-content');
             contentContainer.innerHTML = ''; // Limpia el contenido previo
 
@@ -374,9 +416,13 @@
                 const rateCard = document.createElement('div');
                 rateCard.className = 'mb-3 border p-3 rounded bg-white d-flex align-items-center';
 
+                const checkboxId = `rate-${rate.id}`; // ID único basado en rate.id
+                const linkedCheckboxId = `linked-${rate.id}`; // ID único para el checkbox adicional
+
                 rateCard.innerHTML = `
             <div class="form-check me-3">
-                <input class="form-check-input" type="checkbox" id="rate-${index}" name="rateSelection" value="${rate.id}">
+                <input class="form-check-input rate-selection" type="checkbox" id="${checkboxId}" name="rateSelection" value="${rate.id}">
+                <input type="checkbox" id="${linkedCheckboxId}" class="linked-checkbox d-none" name="quoteSelection" value="${id}">
             </div>
             <div>
                 <h5 class="text-primary">${rate.provider_name}</h5>
@@ -385,13 +431,60 @@
             </div>
         `;
 
+                // Obtener referencias a los checkboxes
+                const mainCheckbox = rateCard.querySelector(`#${checkboxId}`);
+                const linkedCheckbox = rateCard.querySelector(`#${linkedCheckboxId}`);
+
+                // Evento para manejar la selección única
+                mainCheckbox.addEventListener('change', (event) => {
+                    if (event.target.checked) {
+                        // Desmarcar todos los demás checkboxes principales y asociados
+                        document.querySelectorAll('input.rate-selection').forEach((checkbox) => {
+                            if (checkbox !== mainCheckbox) {
+                                checkbox.checked = false;
+                            }
+                        });
+                        document.querySelectorAll('input.linked-checkbox').forEach((checkbox) => {
+                            if (checkbox !== linkedCheckbox) {
+                                checkbox.checked = false;
+                            }
+                        });
+
+                        // Marcar el checkbox oculto asociado
+                        linkedCheckbox.checked = true;
+                    } else {
+                        // Desmarcar el checkbox oculto si se desmarca el principal
+                        linkedCheckbox.checked = false;
+                    }
+                });
+
+                // Sincronización inversa (por si se usa el checkbox oculto directamente)
+                linkedCheckbox.addEventListener('change', (event) => {
+                    if (event.target.checked) {
+                        mainCheckbox.checked = true;
+
+                        // Desmarcar todos los demás checkboxes
+                        document.querySelectorAll('input.rate-selection').forEach((checkbox) => {
+                            if (checkbox !== mainCheckbox) {
+                                checkbox.checked = false;
+                            }
+                        });
+                        document.querySelectorAll('input.linked-checkbox').forEach((checkbox) => {
+                            if (checkbox !== linkedCheckbox) {
+                                checkbox.checked = false;
+                            }
+                        });
+                    } else {
+                        mainCheckbox.checked = false;
+                    }
+                });
+
                 contentContainer.appendChild(rateCard);
             });
 
             // Hacer visible el contenedor
             document.getElementById('additional-info-content').classList.remove('d-none');
         }
-
     </script>
     <style>
         #toggle-additional-info {
@@ -428,14 +521,13 @@
     @if (!auth('customer')->check())
         <div id="register-an-account-wrapper">
             <div class="mb-3 form-group">
-                <input id="create_account" name="create_account" type="checkbox" value="1" @if (old('create_account') == 1)
-                checked @endif>
+                <input id="create_account" name="create_account" type="checkbox" value="1"
+                    @if (old('create_account') == 1) checked @endif>
                 <label class="form-label"
                     for="create_account">{{ __('Register an account with above information?') }}</label>
             </div>
 
-            <div
-                class="password-group @if (!$errors->has('password') && !$errors->has('password_confirmation')) d-none @endif">
+            <div class="password-group @if (!$errors->has('password') && !$errors->has('password_confirmation')) d-none @endif">
                 <div class="row">
                     <div class="col-md-6 col-12">
                         <div class="form-group  @error('password') has-error @enderror">
