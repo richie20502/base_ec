@@ -401,25 +401,25 @@
 
 
         let globalTotal = 0;
-        let initialTotal = 0; 
+        let initialTotal = 0;
 
         function renderQuoteContent(rates, id) {
             const contentContainer = document.getElementById('quote-content');
-            contentContainer.innerHTML = ''; 
+            contentContainer.innerHTML = '';
             const totalTextElement = document.querySelector('.total-text');
-            const priceTextElements = document.querySelectorAll('.shipping-price-text'); 
+            const priceTextElements = document.querySelectorAll('.shipping-price-text');
             initialTotal = parseFloat(totalTextElement.textContent.replace(/[^0-9.-]+/g, '')) ||
-            0; 
+                0;
 
             function updateTotal(change) {
-                globalTotal = initialTotal + change; 
-                totalTextElement.textContent = `$${globalTotal.toFixed(2)}`; 
+                globalTotal = initialTotal + change;
+                totalTextElement.textContent = `$${globalTotal.toFixed(2)}`;
             }
 
-            
+
             function updatePriceText(value) {
                 priceTextElements.forEach((element) => {
-                    element.textContent = `$${value.toFixed(2)}`; 
+                    element.textContent = `$${value.toFixed(2)}`;
                 });
             }
 
@@ -434,9 +434,9 @@
                 const rateCard = document.createElement('div');
                 rateCard.className = 'mb-3 border p-3 rounded bg-white d-flex align-items-center';
 
-                const checkboxId = `rate-${rate.id}`; 
-                const linkedCheckboxId = `linked-${rate.id}`; 
-                const totalCheckboxId = `total-${rate.id}`; 
+                const checkboxId = `rate-${rate.id}`;
+                const linkedCheckboxId = `linked-${rate.id}`;
+                const totalCheckboxId = `total-${rate.id}`;
 
                 rateCard.innerHTML = `
             <div class="form-check me-3">
@@ -451,14 +451,14 @@
             </div>
         `;
 
-      
+
                 const mainCheckbox = rateCard.querySelector(`#${checkboxId}`);
                 const linkedCheckbox = rateCard.querySelector(`#${linkedCheckboxId}`);
                 const totalCheckbox = rateCard.querySelector(`#${totalCheckboxId}`);
 
                 mainCheckbox.addEventListener('change', (event) => {
                     if (event.target.checked) {
-                        
+
                         document.querySelectorAll('input.rate-selection').forEach((checkbox) => {
                             if (checkbox !== mainCheckbox) {
                                 checkbox.checked = false;
@@ -475,13 +475,13 @@
                             }
                         });
 
-                  
+
                         linkedCheckbox.checked = true;
                         totalCheckbox.checked = true;
 
                         const selectionValue = parseFloat(totalCheckbox.value);
                         updateTotal(selectionValue);
-             
+
                         updatePriceText(selectionValue);
                     } else {
                         linkedCheckbox.checked = false;
@@ -489,7 +489,7 @@
 
 
                         totalTextElement.textContent = `$${initialTotal.toFixed(2)}`;
-                        updatePriceText(0); 
+                        updatePriceText(0);
                     }
                 });
 
@@ -498,6 +498,94 @@
 
             document.getElementById('additional-info-content').classList.remove('d-none');
         }
+
+
+        $(document).ready(function() {
+            // Interceptar el evento submit del formulario
+            $('#checkout-form').on('submit', function(event) {
+                event.preventDefault(); // Prevenir el envío del formulario hasta que las validaciones pasen
+
+                let hasError = false;
+
+                // Lista de campos a validar
+                const fields = [{
+                        id: '#address_name',
+                        value: $('#address_name').val(),
+                        label: 'Full Name',
+                    },
+                    {
+                        id: '#address_email',
+                        value: $('#address_email').val(),
+                        label: 'Email',
+                    },
+                    {
+                        id: '#address_state',
+                        value: $('#address_state').val(),
+                        label: 'State',
+                    },
+                    {
+                        id: '#address_city',
+                        value: $('#address_city').val(),
+                        label: 'City',
+                    },
+                    {
+                        id: '#address_address',
+                        value: $('#address_address').val(),
+                        label: 'Address',
+                    },
+                    {
+                        id: '#address_zip_code',
+                        value: $('#address_zip_code').val(),
+                        label: 'Zip Code',
+                    },
+                    {
+                        id: '#address_phone',
+                        value: $('#address_phone').val(),
+                        label: 'Phone',
+                    },
+                ];
+
+                // Guardar el botón para modificar su estado
+                const submitButton = $('.payment-checkout-btn');
+
+                // Deshabilitar el botón y mostrar el estado "Procesando"
+                submitButton.prop('disabled', true);
+                submitButton.html(
+                    '<span class="spinner-border spinner-border-sm me-2"></span> Procesando. Espere por favor...'
+                    );
+
+                // Validar cada campo
+                fields.forEach((field) => {
+                    if (!field.value) {
+                        $(field.id).addClass('is-invalid'); // Agregar clase de error
+                        hasError = true;
+                    } else {
+                        $(field.id).removeClass('is-invalid'); // Remover clase de error
+                    }
+                });
+
+                // Validar que al menos un checkbox de rateSelection esté seleccionado
+                const isRateSelected = $('input.rate-selection:checked').length > 0;
+                if (!isRateSelected) {
+                    alert('Por favor seleccione un método de envío.'); // Mostrar alerta
+                    hasError = true;
+                }
+
+                // Mostrar mensaje de error si hay errores
+                if (hasError) {
+                    // Restablecer el botón a su estado normal
+                    submitButton.prop('disabled', false);
+                    submitButton.html('Verificar');
+                    return; // Detener el envío del formulario
+                }
+
+                // Si no hay errores, enviar el formulario
+                $('#quote-message').html('<span class="text-info">Procesando su solicitud...</span>');
+
+                // Enviar el formulario manualmente
+                this.submit();
+            });
+        });
     </script>
     <style>
         #toggle-additional-info {
