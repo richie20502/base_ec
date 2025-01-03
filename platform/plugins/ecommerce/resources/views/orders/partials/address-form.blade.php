@@ -342,7 +342,7 @@
                     if (hasError) {
                         $('#quote-message').html(
                             '<span class="text-danger">Por favor complete todos los campos requeridos.</span>'
-                            );
+                        );
                         return;
                     }
 
@@ -392,7 +392,7 @@
                         error: function(xhr) {
                             $('#quote-message').html(
                                 `<span class="text-danger">Error: ${xhr.responseJSON.message}</span>`
-                                );
+                            );
                         }
                     });
                 }
@@ -400,11 +400,29 @@
         });
 
 
+        let globalTotal = 0;
+        let initialTotal = 0; 
+
         function renderQuoteContent(rates, id) {
             const contentContainer = document.getElementById('quote-content');
-            contentContainer.innerHTML = ''; // Limpia el contenido previo
+            contentContainer.innerHTML = ''; 
+            const totalTextElement = document.querySelector('.total-text');
+            const priceTextElements = document.querySelectorAll('.shipping-price-text'); 
+            initialTotal = parseFloat(totalTextElement.textContent.replace(/[^0-9.-]+/g, '')) ||
+            0; 
 
-            // Filtrar rates disponibles (success === true)
+            function updateTotal(change) {
+                globalTotal = initialTotal + change; 
+                totalTextElement.textContent = `$${globalTotal.toFixed(2)}`; 
+            }
+
+            
+            function updatePriceText(value) {
+                priceTextElements.forEach((element) => {
+                    element.textContent = `$${value.toFixed(2)}`; 
+                });
+            }
+
             const availableRates = rates.filter(rate => rate.success);
 
             if (availableRates.length === 0) {
@@ -416,13 +434,15 @@
                 const rateCard = document.createElement('div');
                 rateCard.className = 'mb-3 border p-3 rounded bg-white d-flex align-items-center';
 
-                const checkboxId = `rate-${rate.id}`; // ID único basado en rate.id
-                const linkedCheckboxId = `linked-${rate.id}`; // ID único para el checkbox adicional
+                const checkboxId = `rate-${rate.id}`; 
+                const linkedCheckboxId = `linked-${rate.id}`; 
+                const totalCheckboxId = `total-${rate.id}`; 
 
                 rateCard.innerHTML = `
             <div class="form-check me-3">
                 <input class="form-check-input rate-selection" type="checkbox" id="${checkboxId}" name="rateSelection" value="${rate.id}">
                 <input type="checkbox" id="${linkedCheckboxId}" class="linked-checkbox d-none" name="quoteSelection" value="${id}">
+                <input type="checkbox" id="${totalCheckboxId}" class="total-checkbox d-none" name="totalSelection" value="${rate.amount}">
             </div>
             <div>
                 <h5 class="text-primary">${rate.provider_name}</h5>
@@ -431,14 +451,14 @@
             </div>
         `;
 
-                // Obtener referencias a los checkboxes
+      
                 const mainCheckbox = rateCard.querySelector(`#${checkboxId}`);
                 const linkedCheckbox = rateCard.querySelector(`#${linkedCheckboxId}`);
+                const totalCheckbox = rateCard.querySelector(`#${totalCheckboxId}`);
 
-                // Evento para manejar la selección única
                 mainCheckbox.addEventListener('change', (event) => {
                     if (event.target.checked) {
-                        // Desmarcar todos los demás checkboxes principales y asociados
+                        
                         document.querySelectorAll('input.rate-selection').forEach((checkbox) => {
                             if (checkbox !== mainCheckbox) {
                                 checkbox.checked = false;
@@ -449,40 +469,33 @@
                                 checkbox.checked = false;
                             }
                         });
+                        document.querySelectorAll('input.total-checkbox').forEach((checkbox) => {
+                            if (checkbox !== totalCheckbox) {
+                                checkbox.checked = false;
+                            }
+                        });
 
-                        // Marcar el checkbox oculto asociado
+                  
                         linkedCheckbox.checked = true;
+                        totalCheckbox.checked = true;
+
+                        const selectionValue = parseFloat(totalCheckbox.value);
+                        updateTotal(selectionValue);
+             
+                        updatePriceText(selectionValue);
                     } else {
-                        // Desmarcar el checkbox oculto si se desmarca el principal
                         linkedCheckbox.checked = false;
-                    }
-                });
+                        totalCheckbox.checked = false;
 
-                // Sincronización inversa (por si se usa el checkbox oculto directamente)
-                linkedCheckbox.addEventListener('change', (event) => {
-                    if (event.target.checked) {
-                        mainCheckbox.checked = true;
 
-                        // Desmarcar todos los demás checkboxes
-                        document.querySelectorAll('input.rate-selection').forEach((checkbox) => {
-                            if (checkbox !== mainCheckbox) {
-                                checkbox.checked = false;
-                            }
-                        });
-                        document.querySelectorAll('input.linked-checkbox').forEach((checkbox) => {
-                            if (checkbox !== linkedCheckbox) {
-                                checkbox.checked = false;
-                            }
-                        });
-                    } else {
-                        mainCheckbox.checked = false;
+                        totalTextElement.textContent = `$${initialTotal.toFixed(2)}`;
+                        updatePriceText(0); 
                     }
                 });
 
                 contentContainer.appendChild(rateCard);
             });
 
-            // Hacer visible el contenedor
             document.getElementById('additional-info-content').classList.remove('d-none');
         }
     </script>
