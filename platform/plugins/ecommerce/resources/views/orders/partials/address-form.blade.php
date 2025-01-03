@@ -289,6 +289,8 @@
                 $('#toggle-icon').text(isHidden ? '+' : '-');
 
                 if (!isHidden) {
+                   
+
                     // Gather form values and validate
                     let hasError = false;
 
@@ -329,7 +331,6 @@
                         }
                     ];
 
-
                     fields.forEach(field => {
                         if (!field.value) {
                             $(field.id).addClass('is-invalid');
@@ -364,7 +365,7 @@
                         products.push(product);
                     });
 
-
+                    // Enviar la petición AJAX
                     $.ajax({
                         url: "{{ route('ruta.prueba') }}",
                         type: 'POST',
@@ -398,6 +399,9 @@
                 }
             });
         });
+
+
+
 
 
         let globalTotal = 0;
@@ -552,7 +556,7 @@
                 submitButton.prop('disabled', true);
                 submitButton.html(
                     '<span class="spinner-border spinner-border-sm me-2"></span> Procesando. Espere por favor...'
-                    );
+                );
 
                 // Validar cada campo
                 fields.forEach((field) => {

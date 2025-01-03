@@ -541,6 +541,11 @@ class PublicCheckoutController extends BaseController
         HandleApplyPromotionsService $handleApplyPromotionsService
     ) {
         //dd($request->all());
+        $amount = (float) $request->input('amount', 0);
+        $totalSelection = (float) $request->input('totalSelection', 0);
+        $updatedAmount = $amount + $totalSelection;
+        $request->merge(['amount' => $updatedAmount]);
+        
         abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
         if (! EcommerceHelper::isEnabledGuestCheckout() && ! auth('customer')->check()) {
@@ -745,7 +750,7 @@ class PublicCheckoutController extends BaseController
             'user_id' => $currentUserId,
             'shipping_method' => $isAvailableShipping ? $shippingMethodInput : '',
             'shipping_option' => $isAvailableShipping ? $request->input('shipping_option') : null,
-            'shipping_amount' => (float) $shippingAmount,
+            'shipping_amount' => $request->totalSelection,
             'tax_amount' => Cart::instance('cart')->rawTax(),
             'sub_total' => Cart::instance('cart')->rawSubTotal(),
             'coupon_code' => session('applied_coupon_code'),
