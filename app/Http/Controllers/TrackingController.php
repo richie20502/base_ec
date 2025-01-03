@@ -11,10 +11,12 @@ class TrackingController extends Controller
 {
     protected AuthService $authService;
 
-    public function __construct(AuthService $authService)
+    public function __construct(AuthService $authService = null)
     {
-        $this->authService = $authService;
+        $this->authService = $authService ?? new AuthService();
     }
+
+
     public function quotation(Request $request)
     {
         //dd($request->all());
@@ -64,18 +66,18 @@ class TrackingController extends Controller
         $quotationData = [
             'quotation' => [
                 'address_from' => [
-                    'country_code' => 'mx',
-                    'postal_code' => 50000,
-                    'area_level1' => 'Nuevo León',
-                    'area_level2' => 'Monterrey',
-                    'area_level3' => 'Monterrey Centro',
-                    'street1' => 'Padre Raymundo Jardón 925',
-                    'apartment_number' => '3a',
-                    'reference' => 'Casa roja',
-                    'name' => 'Homero Simpson',
-                    'company' => 'Skydropx',
-                    'phone' => 8100998879,
-                    'email' => 'homero.simpson@gmail.com',
+                    'country_code' => env('ADDRESS_COUNTRY_CODE'), // Valor por defecto
+                    'postal_code' => env('ADDRESS_POSTAL_CODE'),
+                    'area_level1' => env('ADDRESS_AREA_LEVEL1'),
+                    'area_level2' => env('ADDRESS_AREA_LEVEL2'),
+                    'area_level3' => env('ADDRESS_AREA_LEVEL3'),
+                    'street1' => env('ADDRESS_STREET1'),
+                    'apartment_number' => env('ADDRESS_APARTMENT_NUMBER'), // Puede ser nulo
+                    'reference' => env('ADDRESS_REFERENCE'),
+                    'name' => env('ADDRESS_NAME'),
+                    'company' => env('ADDRESS_COMPANY'),
+                    'phone' => env('ADDRESS_PHONE'),
+                    'email' => env('ADDRESS_EMAIL'),
                 ],
                 'address_to' => [
                     'country_code' => 'mx',
@@ -103,7 +105,7 @@ class TrackingController extends Controller
                     'paquetexpress',
                     'sendex',
                     'quiken',
-                    'ninetynineminutes',
+                    #'ninetynineminutes',
                     'jtexpress',
                 ],
             ],
@@ -135,6 +137,101 @@ class TrackingController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+
+    }
+
+
+    public function processRate (Request $request, $products){
+        //dd($products);
+        //dd($request->all());
+
+        $productArray = []; // Inicializa un array vacío
+        foreach ($products as $product) {
+            // Agrega cada producto al array
+            $productArray[] = [
+                'name' => $product->name, //si
+                'description' => $product->description, //si
+                'quantity' => 1, //si seteado con uno ahorita
+                'price' => $product->price,// si va 
+                'sale_price' => $product->sale_price, //si
+                "hs_code"=> "1234567890",
+                'product_type_code'=> "P",
+                'product_type_name'=> "Producto",
+                'country_code' => 'MX',
+                'weight' => $product->weight, //si 
+                'weight_unit' => $product->weight,
+            ];
+        }
+
+
+        //dd($productArray);
+
+        $total = $request->input('sub_total');
+        $name = $request->address['name'];
+      
+        $company = "Zensara";
+        $email = $request->address['email'];
+        $phone = $request->address['phone'];
+        $street = $request->address['address'];
+        $postalCode = $request->address['zip_code'];
+        
+        $number = $request->address['phone'];
+        $district = $request->address['country'];;
+        $city = $request->address['city'];
+        $state = $request->address['state'];
+
+        $quotationId = $request->quoteSelection;
+        $rateId =  $request->rateSelection;
+        
+        $reference = "referencias";
+
+        $data_shipment = [
+            'shipment' => [
+                'quotation_id' => $quotationId,
+                'rate_id' => $rateId,
+                'protected' => true,
+                'declared_value' => 1400,
+                'printing_format' => "thermal",
+                "address_from" => [
+                    'country_code' => env('ADDRESS_COUNTRY_CODE'), 
+                    'postal_code' => env('ADDRESS_POSTAL_CODE'),
+                    'area_level1' => env('ADDRESS_AREA_LEVEL1'),
+                    'area_level2' => env('ADDRESS_AREA_LEVEL2'),
+                    'area_level3' => env('ADDRESS_AREA_LEVEL3'),
+                    'street1' => env('ADDRESS_STREET1'),
+                    'apartment_number' => env('ADDRESS_APARTMENT_NUMBER'),
+                    'reference' => env('ADDRESS_REFERENCE'),
+                    'name' => env('ADDRESS_NAME'),
+                    'company' => env('ADDRESS_COMPANY'),
+                    'phone' => env('ADDRESS_PHONE'),
+                    'email' => env('ADDRESS_EMAIL'),
+                ],
+                "address_to" => [
+                    "country_code"=> "mx",
+                    "postal_code"=> $postalCode,
+                    "area_level1"=> $state,
+                    "area_level2"=>  $city,
+                    "area_level3"=> $street,
+                    "street1"=> $street,
+                    "name"=> $name,
+                    "company"=> $company,
+                    "phone"=> $phone,
+                    "email"=> $email,
+                    "reference"=> $reference
+                ],
+                "consignment_note"=> "53102400",
+                "package_type"=> "4G",
+                "products" => $productArray
+            ],
+        ];
+
+        $response = $this->authService->createShipment($data_shipment);
+        return response()->json([
+            'message' => 'Tarifa seleccionada correctamente.',
+            'rate_id' => $rateId,
+            'quotation_id' => $quotationId,
+        ]);
+
 
     }
 }

@@ -50,6 +50,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Throwable;
+use App\Http\Controllers\TrackingController;
 
 class PublicCheckoutController extends BaseController
 {
@@ -211,6 +212,8 @@ class PublicCheckoutController extends BaseController
         if (view()->exists($checkoutView)) {
             return view($checkoutView, $data);
         }
+
+        
 
         return view(
             'plugins/ecommerce::orders.checkout',
@@ -537,7 +540,7 @@ class PublicCheckoutController extends BaseController
         HandleRemoveCouponService $removeCouponService,
         HandleApplyPromotionsService $handleApplyPromotionsService
     ) {
-        dd($request->all());
+        //dd($request->all());
         abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
         if (! EcommerceHelper::isEnabledGuestCheckout() && ! auth('customer')->check()) {
@@ -554,6 +557,7 @@ class PublicCheckoutController extends BaseController
         }
 
         $products = Cart::instance('cart')->products();
+        //dd($products);
 
         if (
             EcommerceHelper::isEnabledSupportDigitalProducts() &&
@@ -566,7 +570,7 @@ class PublicCheckoutController extends BaseController
                 ->setMessage(__('Your shopping cart has digital product(s), so you need to sign in to continue!'));
         }
 
-        $totalQuality = Cart::instance('cart')->rawTotalQuantity();
+        $totalQuality = Cart::instance('cart')->rawTotalQuantity(); 
 
         if (($minimumQuantity = EcommerceHelper::getMinimumOrderQuantity()) > 0
             && $totalQuality < $minimumQuantity) {
@@ -869,6 +873,11 @@ class PublicCheckoutController extends BaseController
                 ->setMessage($paymentData['message'] ?: __('Checkout error!'));
         }
 
+        $trackingController = new TrackingController(); // Instanciar el controlador
+
+        $dataTracking = $trackingController->processRate($request, $products);
+        //dd($dataTracking);
+
         return $this
             ->httpResponse()
             ->setNextUrl(PaymentHelper::getRedirectURL($token))
@@ -910,6 +919,7 @@ class PublicCheckoutController extends BaseController
         $products = $order->getOrderProducts();
 
         OrderHelper::clearSessions($token);
+
 
         return view('plugins/ecommerce::orders.thank-you', compact('order', 'products'));
     }
