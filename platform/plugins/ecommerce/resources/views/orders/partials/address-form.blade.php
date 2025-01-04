@@ -22,6 +22,9 @@
                 $oldSessionAddressId = old('address.address_id', $sessionAddressId);
             @endphp
             <div class="list-customer-address @if (!$isAvailableAddress) d-none @endif">
+
+                <input type="hidden" name="address_default_validate" id="address_default_validate" value="0" readonly>
+
                 <div class="select--arrow">
                     <select class="form-control" id="address_id" name="address[address_id]" @required($isAvailableAddress)>
                         <option value="new" @selected($oldSessionAddressId == 'new')>{{ __('Add new address...') }}</option>
@@ -191,7 +194,8 @@
                             <div class="form-input-wrapper">
                                 <input class="form-control" id="address_city" name="address[city]" autocomplete="city"
                                     type="text"
-                                    value="{{ old('address.city', Arr::get($sessionCheckoutData, 'city')) }}" required>
+                                    value="{{ old('address.city', Arr::get($sessionCheckoutData, 'city')) }}"
+                                    required>
                                 <label for="address_city">{{ __('City') }}</label>
                             </div>
                         @else
@@ -282,6 +286,29 @@
 
     <script>
         $(document).ready(function() {
+
+
+            //asignacion valor si es direccion escrita o existente
+            function handleAddressChange() {
+                const selectedValue = $('#address_id').val(); // Obtiene el valor seleccionado del select
+                const $inputValidate = $(
+                    '#address_default_validate');
+
+                if (selectedValue === 'new') {
+                    $inputValidate.val('1');
+                } else {
+                    $inputValidate.val('0');
+                }
+            }
+
+
+            handleAddressChange();
+
+            $('#address_id').on('change', handleAddressChange);
+
+
+
+
             $('#toggle-additional-info').on('click', function() {
                 // Toggle the visibility of the content
                 $('#additional-info-content').toggleClass('d-none');
@@ -292,7 +319,7 @@
 
 
                     // Gather form values and validate
-                    let hasError = false;
+                    /*let hasError = false;
 
                     const fields = [{
                             id: '#address_name',
@@ -346,12 +373,16 @@
                         );
                         return;
                     }
+                    */
 
-                    $('#quote-message').html('<span style="color: #93C47D;">Procesando su solicitud...</span>');
+                    $('#quote-message').html(
+                        '<span style="color: #93C47D;">Procesando su solicitud...</span>');
 
                     let products = [];
 
                     // Iterar sobre cada producto en el formulario
+
+
                     $('.product-item').each(function() {
                         let product = {
                             id: $(this).find('.product-id').val(),
@@ -366,36 +397,80 @@
                     });
 
                     // Enviar la petición AJAX
-                    $.ajax({
-                        url: "{{ route('ruta.prueba') }}",
-                        type: 'POST',
-                        data: {
-                            fullName: $('#address_name').val(),
-                            email: $('#address_email').val(),
-                            state: $('#address_state').val(),
-                            city: $('#address_city').val(),
-                            address: $('#address_address').val(),
-                            zipCode: $('#address_zip_code').val(),
-                            phone: $('#address_phone').val(),
-                            _token: $('meta[name="csrf-token"]').attr('content'),
-                            products: products
-                        },
-                        success: function(response) {
-                            console.log(response);
+                    $valueAddress = $('#address_default_validate').val();
 
-                            if (response.data.rates) {
-                                console.log(response.data.id)
-                                renderQuoteContent(response.data.rates, response.data.id);
+                    if ($valueAddress == 1) {
+                        $.ajax({
+                            url: "{{ route('ruta.prueba') }}",
+                            type: 'POST',
+                            data: {
+                                fullName: $('#address_name').val(),
+                                email: $('#address_email').val(),
+                                state: $('#address_state').val(),
+                                city: $('#address_city').val(),
+                                address: $('#address_address').val(),
+                                zipCode: $('#address_zip_code').val(),
+                                phone: $('#address_phone').val(),
+                                _token: $('meta[name="csrf-token"]').attr('content'),
+                                products: products
+                            },
+                            success: function(response) {
+                                console.log(response);
+
+                                if (response.data.rates) {
+                                    console.log(response.data.id)
+                                    renderQuoteContent(response.data.rates, response.data.id);
+                                }
+                                $('#quote-message').html(
+                                    `<span class="text-success">${response.message}</span>`);
+                            },
+                            error: function(xhr) {
+                                $('#quote-message').html(
+                                    `<span class="text-danger">Error: ${xhr.responseJSON.message}</span>`
+                                );
                             }
-                            $('#quote-message').html(
-                                `<span class="text-success">${response.message}</span>`);
-                        },
-                        error: function(xhr) {
-                            $('#quote-message').html(
-                                `<span class="text-danger">Error: ${xhr.responseJSON.message}</span>`
-                            );
-                        }
-                    });
+                        });
+
+                    } else {
+
+                        $.ajax({
+                            url: "{{ route('ruta.prueba') }}",
+                            type: 'POST',
+                            data: {
+                                fullName: $('#address_name_default').val(),
+                                email: $('#address_email_default').val(),
+                                state: $('#address_state_default').val(),
+                                city: $('#address_city').val(),
+                                address: $('#address_city_default').val(),
+                                zipCode: $('#address_zip_code_default').val(),
+                                phone: $('#address_phone_default').val(),
+                                _token: $('meta[name="csrf-token"]').attr('content'),
+                                products: products
+                            },
+                            success: function(response) {
+                                console.log(response);
+
+                                if (response.data.rates) {
+                                    console.log(response.data.id)
+                                    renderQuoteContent(response.data.rates, response.data.id);
+                                }
+                                $('#quote-message').html(
+                                    `<span class="text-success">${response.message}</span>`);
+                            },
+                            error: function(xhr) {
+                                $('#quote-message').html(
+                                    `<span class="text-danger">Error: ${xhr.responseJSON.message}</span>`
+                                );
+                            }
+                        });
+
+
+                    }
+
+
+
+
+
                 }
             });
         });
@@ -511,43 +586,59 @@
 
                 let hasError = false;
 
-                // Lista de campos a validar
-                const fields = [{
-                        id: '#address_name',
-                        value: $('#address_name').val(),
-                        label: 'Full Name',
-                    },
-                    {
-                        id: '#address_email',
-                        value: $('#address_email').val(),
-                        label: 'Email',
-                    },
-                    {
-                        id: '#address_state',
-                        value: $('#address_state').val(),
-                        label: 'State',
-                    },
-                    {
-                        id: '#address_city',
-                        value: $('#address_city').val(),
-                        label: 'City',
-                    },
-                    {
-                        id: '#address_address',
-                        value: $('#address_address').val(),
-                        label: 'Address',
-                    },
-                    {
-                        id: '#address_zip_code',
-                        value: $('#address_zip_code').val(),
-                        label: 'Zip Code',
-                    },
-                    {
-                        id: '#address_phone',
-                        value: $('#address_phone').val(),
-                        label: 'Phone',
-                    },
-                ];
+                $addres = $('#address_default_validate').val();
+                if ($addres == 1) {
+                    // Lista de campos a validar
+                    const fields = [{
+                            id: '#address_name',
+                            value: $('#address_name').val(),
+                            label: 'Full Name',
+                        },
+                        {
+                            id: '#address_email',
+                            value: $('#address_email').val(),
+                            label: 'Email',
+                        },
+                        {
+                            id: '#address_state',
+                            value: $('#address_state').val(),
+                            label: 'State',
+                        },
+                        {
+                            id: '#address_city',
+                            value: $('#address_city').val(),
+                            label: 'City',
+                        },
+                        {
+                            id: '#address_address',
+                            value: $('#address_address').val(),
+                            label: 'Address',
+                        },
+                        {
+                            id: '#address_zip_code',
+                            value: $('#address_zip_code').val(),
+                            label: 'Zip Code',
+                        },
+                        {
+                            id: '#address_phone',
+                            value: $('#address_phone').val(),
+                            label: 'Phone',
+                        },
+                    ];
+
+
+
+                    // Validar cada campo
+                    fields.forEach((field) => {
+                        if (!field.value) {
+                            $(field.id).addClass('is-invalid'); // Agregar clase de error
+                            hasError = true;
+                        } else {
+                            $(field.id).removeClass('is-invalid'); // Remover clase de error
+                        }
+                    });
+
+                }
 
                 // Guardar el botón para modificar su estado
                 const submitButton = $('.payment-checkout-btn');
@@ -558,15 +649,6 @@
                     '<span class="spinner-border spinner-border-sm me-2"></span> Procesando. Espere por favor...'
                 );
 
-                // Validar cada campo
-                fields.forEach((field) => {
-                    if (!field.value) {
-                        $(field.id).addClass('is-invalid'); // Agregar clase de error
-                        hasError = true;
-                    } else {
-                        $(field.id).removeClass('is-invalid'); // Remover clase de error
-                    }
-                });
 
                 // Validar que al menos un checkbox de rateSelection esté seleccionado
                 const isRateSelected = $('input.rate-selection:checked').length > 0;

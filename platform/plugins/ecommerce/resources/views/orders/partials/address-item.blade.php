@@ -1,6 +1,6 @@
 <div class="address-item @if ($address->is_default) is-default @endif" data-id="{{ $address->id }}">
     <p class="name">{{ $address->name }}</p>
-    <input type="hidden" name="address_default_validate" id="address_default_validate">
+    
 
     <input class="form-control" id="address_name_default" name="address[name]" autocomplete="family-name" type="hidden"
         value="{{ $address->name }}" required>
