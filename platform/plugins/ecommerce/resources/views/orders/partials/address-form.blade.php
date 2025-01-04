@@ -289,7 +289,7 @@
                 $('#toggle-icon').text(isHidden ? '+' : '-');
 
                 if (!isHidden) {
-                   
+
 
                     // Gather form values and validate
                     let hasError = false;
@@ -347,7 +347,7 @@
                         return;
                     }
 
-                    $('#quote-message').html('<span class="text-info">Procesando su solicitud...</span>');
+                    $('#quote-message').html('<span style="color: #93C47D;">Procesando su solicitud...</span>');
 
                     let products = [];
 
@@ -449,7 +449,7 @@
                 <input type="checkbox" id="${totalCheckboxId}" class="total-checkbox d-none" name="totalSelection" value="${rate.amount}">
             </div>
             <div>
-                <h5 class="text-primary">${rate.provider_name}</h5>
+                <h5 style="color: #93C47D;">${rate.provider_name}</h5>
                 <p><strong>Días:</strong> ${rate.days ?? 'No especificado'}</p>
                 <p><strong>Precio:</strong> ${rate.amount ?? 'No disponible'}</p>
             </div>
@@ -595,19 +595,23 @@
         #toggle-additional-info {
             font-weight: bold;
             border: none;
-            background: #007bff;
-            color: white;
+            background: #93C47D;
+            color: black;
             border-radius: 5px;
             transition: background 0.3s, transform 0.3s;
         }
 
         #toggle-additional-info:hover {
-            background: #0056b3;
+            background: #93C47D;
             transform: scale(1.02);
         }
 
         #additional-info-content {
             animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .text-success {
+            color: #93C47D;
         }
 
         @keyframes fadeIn {
