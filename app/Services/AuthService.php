@@ -162,4 +162,20 @@ class AuthService
             throw new \Exception('Error al rastrear el envío: ' . $e->getMessage());
         }
     }
+
+    public function getShipmentById(string $shipmentId): array
+    {
+        $token = $this->getToken();
+        try {
+            $response = $this->client->get($this->authUrl . 'shipments/' . $shipmentId, [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer ' . $token,
+                ],
+            ]);
+            return json_decode($response->getBody(), true);
+        } catch (\Exception $e) {
+            throw new \Exception('Error al obtener el envío: ' . $e->getMessage());
+        }
+    }
 }
