@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\Address;
 use App\Services\AuthService;
+use App\Models\SkydropTracking;
 
 class TrackingController extends Controller
 {
@@ -276,5 +277,26 @@ class TrackingController extends Controller
         ]);
 
 
+    }
+
+
+    public function tracking(){
+        $authCustomer = auth('customer')->id();
+        $trackings = SkydropTracking::where('customer_id', $authCustomer)->get();
+
+
+        $jsonData = $trackings->map(function ($tracking) {
+            return [
+                'tracking_number' => $tracking->tracking_number,
+                'customer_id' => $tracking->customer_id,
+                'carrier_name' => $tracking->carrier_name,
+                'order_id' => $tracking->order_id,
+                'quotation_id' => $tracking->quotation_id,
+            ];
+        });
+    
+        // Convertir a JSON
+        $jsonResult = json_encode($jsonData, JSON_PRETTY_PRINT);
+        dd(vars: $jsonResult);
     }
 }

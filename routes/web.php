@@ -15,3 +15,5 @@ use App\Http\Controllers\TrackingController;
 */
 
 Route::post('/ruta-prueba',[TrackingController::class, 'quotation'])->name('ruta.prueba');
+
+Route::get('/customer/tracking-zensara',[TrackingController::class,'tracking'])->name('');
