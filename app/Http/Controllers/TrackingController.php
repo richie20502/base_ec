@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Botble\Ecommerce\Models\Product;
+use Botble\Ecommerce\Models\Address;
 use App\Services\AuthService;
 
 class TrackingController extends Controller
@@ -110,7 +111,9 @@ class TrackingController extends Controller
                 ],
             ],
         ];
+            Log::info("INI QUOTATION DATA");
             Log::info($quotationData);
+            Log::info("FIN QUOTATION DATA");
         try {
             $response = $this->authService->createQuotation($quotationData);
 
@@ -167,18 +170,56 @@ class TrackingController extends Controller
         //dd($productArray);
 
         $total = $request->input('sub_total');
-        $name = $request->address['name'];
-      
+
         $company = "Zensara";
-        $email = $request->address['email'];
-        $phone = $request->address['phone'];
-        $street = $request->address['address'];
-        $postalCode = $request->address['zip_code'];
+
+        if (isset($request->address['address_id'])) {
+            if($request->address['address_id'] == 'new'){
+                $name = $request->address['name'];
+                $email = $request->address['email'];
+                $phone = $request->address['phone'];
+                $street = $request->address['address'];
+                $postalCode = $request->address['zip_code'];
+                
+                $number = $request->address['phone'];
+                $district = $request->address['country'];;
+                $city = $request->address['city'];
+                $state = $request->address['state'];
+    
+            }else{
+    
+                $add = Address::find($request->address['address_id']);
+                $name = $add->name;
+                $email = $add->email;
+                $phone =  $add->phone;
+                $street =  $add->address;
+                $postalCode =  $add->zip_code;
+                
+                $number =  $add->phone;
+                $district =  $add->country;
+                $city =  $add->city;
+                $state =  $add->state;
+    
+            }
+
+        }else{
+            $name = $request->address['name'];
+            $email = $request->address['email'];
+            $phone = $request->address['phone'];
+            $street = $request->address['address'];
+            $postalCode = $request->address['zip_code'];
+                
+            $number = $request->address['phone'];
+            $district = $request->address['country'];;
+            $city = $request->address['city'];
+            $state = $request->address['state'];
+        }
+
         
-        $number = $request->address['phone'];
-        $district = $request->address['country'];;
-        $city = $request->address['city'];
-        $state = $request->address['state'];
+        
+      
+        
+        
 
         $quotationId = $request->quoteSelection;
         $rateId =  $request->rateSelection;
@@ -226,8 +267,10 @@ class TrackingController extends Controller
         ];
 
         $response = $this->authService->createShipment($data_shipment);
+
         return response()->json([
             'message' => 'Tarifa seleccionada correctamente.',
+            'shipment_id' => $response['data']['id'],
             'rate_id' => $rateId,
             'quotation_id' => $quotationId,
         ]);

@@ -51,6 +51,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 use App\Http\Controllers\TrackingController;
+use App\Http\Controllers\SkydropTrackingController;
 
 class PublicCheckoutController extends BaseController
 {
@@ -541,6 +542,7 @@ class PublicCheckoutController extends BaseController
         HandleApplyPromotionsService $handleApplyPromotionsService
     ) {
         //dd($request->all());
+        //dd(auth('customer')->id());
         $amount = (float) $request->input('amount', 0);
         $totalSelection = (float) $request->input('totalSelection', 0);
         $updatedAmount = $amount + $totalSelection;
@@ -881,7 +883,14 @@ class PublicCheckoutController extends BaseController
         $trackingController = new TrackingController(); // Instanciar el controlador
 
         $dataTracking = $trackingController->processRate($request, $products);
+
+        $skydropTrackingController = new SkydropTrackingController();
+
+        $datSkydropTracking = $skydropTrackingController->create($dataTracking, auth('customer')->id(), $order->getKey());
+
+
         //dd($dataTracking);
+
 
         return $this
             ->httpResponse()

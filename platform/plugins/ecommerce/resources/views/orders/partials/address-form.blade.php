@@ -1,6 +1,7 @@
 <div class="customer-address-payment-form">
     <input type="hidden" name="update-tax-url" id="update-checkout-tax-url"
         value="{{ route('public.ajax.checkout.update-tax') }}">
+    <input type="hidden" name="address_default_validate" id="address_default_validate" value="1" readonly>
     <div class="mb-3 form-group">
         @if (auth('customer')->check())
             <p>{{ __('Account') }}: <strong>{{ auth('customer')->user()->name }}</strong> -
@@ -23,7 +24,7 @@
             @endphp
             <div class="list-customer-address @if (!$isAvailableAddress) d-none @endif">
 
-                <input type="hidden" name="address_default_validate" id="address_default_validate" value="0" readonly>
+
 
                 <div class="select--arrow">
                     <select class="form-control" id="address_id" name="address[address_id]" @required($isAvailableAddress)>
@@ -291,19 +292,21 @@
             //asignacion valor si es direccion escrita o existente
             function handleAddressChange() {
                 const selectedValue = $('#address_id').val(); // Obtiene el valor seleccionado del select
-                const $inputValidate = $(
-                    '#address_default_validate');
+                const $inputValidate = $('#address_default_validate'); // Input relacionado
 
                 if (selectedValue === 'new') {
+                    console.log("new");
                     $inputValidate.val('1');
                 } else {
+                    console.log("else new");
                     $inputValidate.val('0');
                 }
             }
 
+            // Establece el valor inicial del select como "new" al cargar el DOM
+            $('#address_id').val('new').trigger('change');
 
-            handleAddressChange();
-
+            // Agrega el evento al select para manejar cambios
             $('#address_id').on('change', handleAddressChange);
 
 
@@ -311,6 +314,11 @@
 
             $('#toggle-additional-info').on('click', function() {
                 // Toggle the visibility of the content
+                $('#quote-message').html(
+                    '<span style="color: #93C47D;">Procesando su solicitud...</span>');
+                $('#quote-content').html(
+                        '<span style="color: #93C47D;">Procesando su solicitud...</span>');
+                    
                 $('#additional-info-content').toggleClass('d-none');
                 const isHidden = $('#additional-info-content').hasClass('d-none');
                 $('#toggle-icon').text(isHidden ? '+' : '-');
@@ -318,65 +326,75 @@
                 if (!isHidden) {
 
 
-                    // Gather form values and validate
-                    /*let hasError = false;
+                    $valueAddress = $('#address_default_validate').val();
 
-                    const fields = [{
-                            id: '#address_name',
-                            value: $('#address_name').val(),
-                            label: 'Full Name'
-                        },
-                        {
-                            id: '#address_email',
-                            value: $('#address_email').val(),
-                            label: 'Email'
-                        },
-                        {
-                            id: '#address_state',
-                            value: $('#address_state').val(),
-                            label: 'State'
-                        },
-                        {
-                            id: '#address_city',
-                            value: $('#address_city').val(),
-                            label: 'City'
-                        },
-                        {
-                            id: '#address_address',
-                            value: $('#address_address').val(),
-                            label: 'Address'
-                        },
-                        {
-                            id: '#address_zip_code',
-                            value: $('#address_zip_code').val(),
-                            label: 'Zip Code'
-                        },
-                        {
-                            id: '#address_phone',
-                            value: $('#address_phone').val(),
-                            label: 'Phone'
+                    if ($valueAddress == 1) {
+                        let hasError = false;
+
+                        const fields = [{
+                                id: '#address_name',
+                                value: $('#address_name').val(),
+                                label: 'Full Name'
+                            },
+                            {
+                                id: '#address_email',
+                                value: $('#address_email').val(),
+                                label: 'Email'
+                            },
+                            {
+                                id: '#address_state',
+                                value: $('#address_state').val(),
+                                label: 'State'
+                            },
+                            {
+                                id: '#address_city',
+                                value: $('#address_city').val(),
+                                label: 'City'
+                            },
+                            {
+                                id: '#address_address',
+                                value: $('#address_address').val(),
+                                label: 'Address'
+                            },
+                            {
+                                id: '#address_zip_code',
+                                value: $('#address_zip_code').val(),
+                                label: 'Zip Code'
+                            },
+                            {
+                                id: '#address_phone',
+                                value: $('#address_phone').val(),
+                                label: 'Phone'
+                            }
+                        ];
+
+                        fields.forEach(field => {
+                            if (!field.value) {
+                                $(field.id).addClass('is-invalid');
+                                hasError = true;
+                            } else {
+                                $(field.id).removeClass('is-invalid');
+                            }
+                        });
+
+                        if (hasError) {
+                            $('#quote-message').html(
+                                '<span class="text-danger">Por favor complete todos los campos requeridos.</span>'
+                            );
+                            $('#quote-content').html(
+                                '<span class="text-danger">Por favor complete todos los campos requeridos.</span>'
+                            );
+
+                            
+                            return;
                         }
-                    ];
-
-                    fields.forEach(field => {
-                        if (!field.value) {
-                            $(field.id).addClass('is-invalid');
-                            hasError = true;
-                        } else {
-                            $(field.id).removeClass('is-invalid');
-                        }
-                    });
-
-                    if (hasError) {
-                        $('#quote-message').html(
-                            '<span class="text-danger">Por favor complete todos los campos requeridos.</span>'
-                        );
-                        return;
                     }
-                    */
 
-                    $('#quote-message').html(
-                        '<span style="color: #93C47D;">Procesando su solicitud...</span>');
+
+                    // Gather form values and validate
+
+
+
 
                     let products = [];
 
@@ -400,6 +418,8 @@
                     $valueAddress = $('#address_default_validate').val();
 
                     if ($valueAddress == 1) {
+                        console.log("if ")
+                        console.log($('#address_zip_code').val());
                         $.ajax({
                             url: "{{ route('ruta.prueba') }}",
                             type: 'POST',
@@ -428,10 +448,24 @@
                                 $('#quote-message').html(
                                     `<span class="text-danger">Error: ${xhr.responseJSON.message}</span>`
                                 );
+
+                                $('#quote-content').html(
+                                    `<span class="text-danger">Error: ${xhr.responseJSON.message}</span>`
+                                );
+
+                                
                             }
                         });
 
                     } else {
+                        console.log("else")
+                        console.log($('#address_name_default').val());
+                        console.log($('#address_email_default').val());
+                        console.log($('#address_state_default').val());
+                        console.log($('#address_city').val());
+                        console.log($('#address_city_default').val());
+                        console.log($('#address_zip_code_default').val());
+                        console.log($('#address_phone_default').val());
 
                         $.ajax({
                             url: "{{ route('ruta.prueba') }}",
@@ -461,7 +495,13 @@
                                 $('#quote-message').html(
                                     `<span class="text-danger">Error: ${xhr.responseJSON.message}</span>`
                                 );
+
+                                $('#quote-content').html(
+                                    `<span class="text-danger">Error: ${xhr.responseJSON.message}</span>`
+                                );
+
                             }
+                            
                         });
 
 
