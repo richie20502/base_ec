@@ -142,4 +142,24 @@ class AuthService
             throw new \Exception('Error al crear el envío: ' . $e->getMessage());
         }
     }
+
+    public function trackShipment(string $trackingNumber, string $carrierName): array
+    {
+        $token = $this->getToken(); 
+        try {
+            $response = $this->client->get($this->authUrl . 'shipments/tracking', [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer ' . $token,
+                ],
+                'query' => [
+                    'tracking_number' => $trackingNumber,
+                    'carrier_name' => $carrierName,
+                ],
+            ]);
+            return json_decode($response->getBody(), true);
+        } catch (\Exception $e) {
+            throw new \Exception('Error al rastrear el envío: ' . $e->getMessage());
+        }
+    }
 }
