@@ -286,8 +286,22 @@ class TrackingController extends Controller
 
 
         $jsonData = $trackings->map(function ($tracking) {
+
+            $data = $this->authService->getShipmentById($tracking->tracking_number);
+
+            $shipmentData = $data['data'] ?? [];
+            $attributes = $shipmentData['attributes'] ?? [];
+            $included = collect($data['included'] ?? []);
+    
+            $trackingStatus = $included
+                ->firstWhere('type', 'package')['attributes']['tracking_status'] ?? null;
+
+            $workflowStatus = $data['data']['attributes']['workflow_status'] ?? null;
+
             return [
                 'tracking_number' => $tracking->tracking_number,
+                "tracking_status" => $trackingStatus,
+                "workflow_status" => $workflowStatus,
                 'customer_id' => $tracking->customer_id,
                 'carrier_name' => $tracking->carrier_name,
                 'order_id' => $tracking->order_id,
