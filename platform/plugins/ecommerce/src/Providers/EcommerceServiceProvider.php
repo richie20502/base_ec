@@ -968,6 +968,13 @@ class EcommerceServiceProvider extends ServiceProvider
                     'icon' => 'ti ti-settings',
                 ])
                 ->registerItem([
+                    'id' => 'cms-customer-tracking',
+                    'priority' => 999,
+                    'name' => __('Go Tracking'),
+                    'url' => fn () => route('customer.tracking'),
+                    'icon' => 'ti ti-shopping-cart',
+                ])
+                ->registerItem([
                     'id' => 'cms-customer-logout',
                     'priority' => 999,
                     'name' => __('Logout'),

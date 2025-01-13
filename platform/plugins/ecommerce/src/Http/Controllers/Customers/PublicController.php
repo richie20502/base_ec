@@ -42,6 +42,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Http\Controllers\TrackingController;
 
 class PublicController extends BaseController
 {
@@ -771,6 +772,21 @@ class PublicController extends BaseController
             'ecommerce.customers.product-reviews.list',
             compact('products', 'reviews'),
             'plugins/ecommerce::themes.customers.product-reviews.list'
+        )->render();
+    }
+
+    public function GetTracking(){
+
+        $trackingController = new TrackingController();
+        $jsonResponse = $trackingController->tracking();
+
+        // Decodificar el contenido JSON a un array
+        $data = json_decode($jsonResponse->getContent(), true);
+
+        return Theme::scope(
+            'ecommerce.customers.tracking.tracking',
+            compact('data'),
+            'plugins/ecommerce::themes.customers.tracking.tracking'
         )->render();
     }
 }

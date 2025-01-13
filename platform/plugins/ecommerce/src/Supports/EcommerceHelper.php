@@ -1404,6 +1404,7 @@ class EcommerceHelper
             'customer_order_returns' => 'customer/order-returns',
             'customer_orders' => 'customer/orders',
             'customer_product_reviews' => 'customer/product-reviews',
+            'customer_tracking' => 'customer/product-tracking'
         ];
 
         if ($key) {

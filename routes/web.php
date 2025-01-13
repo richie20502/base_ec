@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TrackingController;
 
+use Botble\Ecommerce\Http\Controllers\Customers\PublicController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,3 +19,4 @@ use App\Http\Controllers\TrackingController;
 Route::post('/ruta-prueba',[TrackingController::class, 'quotation'])->name('ruta.prueba');
 
 Route::get('/customer/tracking-zensara',[TrackingController::class,'tracking'])->name('');
+Route::get('/customer/tracking',[PublicController::class,'GetTracking'])->name('customer.tracking');

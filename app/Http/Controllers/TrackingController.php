@@ -137,7 +137,7 @@ class TrackingController extends Controller
             ], 200);
 
 
-        
+
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -156,13 +156,13 @@ class TrackingController extends Controller
                 'name' => $product->name, //si
                 'description' => $product->description, //si
                 'quantity' => 1, //si seteado con uno ahorita
-                'price' => $product->price,// si va 
+                'price' => $product->price,// si va
                 'sale_price' => $product->sale_price, //si
                 "hs_code"=> "1234567890",
                 'product_type_code'=> "P",
                 'product_type_name'=> "Producto",
                 'country_code' => 'MX',
-                'weight' => $product->weight, //si 
+                'weight' => $product->weight, //si
                 'weight_unit' => $product->weight,
             ];
         }
@@ -181,26 +181,26 @@ class TrackingController extends Controller
                 $phone = $request->address['phone'];
                 $street = $request->address['address'];
                 $postalCode = $request->address['zip_code'];
-                
+
                 $number = $request->address['phone'];
                 $district = $request->address['country'];;
                 $city = $request->address['city'];
                 $state = $request->address['state'];
-    
+
             }else{
-    
+
                 $add = Address::find($request->address['address_id']);
                 $name = $add->name;
                 $email = $add->email;
                 $phone =  $add->phone;
                 $street =  $add->address;
                 $postalCode =  $add->zip_code;
-                
+
                 $number =  $add->phone;
                 $district =  $add->country;
                 $city =  $add->city;
                 $state =  $add->state;
-    
+
             }
 
         }else{
@@ -209,22 +209,22 @@ class TrackingController extends Controller
             $phone = $request->address['phone'];
             $street = $request->address['address'];
             $postalCode = $request->address['zip_code'];
-                
+
             $number = $request->address['phone'];
             $district = $request->address['country'];;
             $city = $request->address['city'];
             $state = $request->address['state'];
         }
 
-        
-        
-      
-        
-        
+
+
+
+
+
 
         $quotationId = $request->quoteSelection;
         $rateId =  $request->rateSelection;
-        
+
         $reference = "referencias";
 
         $data_shipment = [
@@ -235,7 +235,7 @@ class TrackingController extends Controller
                 'declared_value' => 1400,
                 'printing_format' => "thermal",
                 "address_from" => [
-                    'country_code' => env('ADDRESS_COUNTRY_CODE'), 
+                    'country_code' => env('ADDRESS_COUNTRY_CODE'),
                     'postal_code' => env('ADDRESS_POSTAL_CODE'),
                     'area_level1' => env('ADDRESS_AREA_LEVEL1'),
                     'area_level2' => env('ADDRESS_AREA_LEVEL2'),
@@ -280,19 +280,18 @@ class TrackingController extends Controller
     }
 
 
-    public function tracking(){
+    public function tracking()
+    {
         $authCustomer = auth('customer')->id();
         $trackings = SkydropTracking::where('customer_id', $authCustomer)->get();
 
-
         $jsonData = $trackings->map(function ($tracking) {
-
             $data = $this->authService->getShipmentById($tracking->tracking_number);
 
             $shipmentData = $data['data'] ?? [];
             $attributes = $shipmentData['attributes'] ?? [];
             $included = collect($data['included'] ?? []);
-    
+
             $trackingStatus = $included
                 ->firstWhere('type', 'package')['attributes']['tracking_status'] ?? null;
 
@@ -308,9 +307,8 @@ class TrackingController extends Controller
                 'quotation_id' => $tracking->quotation_id,
             ];
         });
-    
-        // Convertir a JSON
-        $jsonResult = json_encode($jsonData, JSON_PRETTY_PRINT);
-        dd(vars: $jsonResult);
+
+        // Convertir la colección en un array basado en índices numéricos
+        return response()->json(array_values($jsonData->toArray()), 200);
     }
 }
