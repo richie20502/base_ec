@@ -6,23 +6,30 @@
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
-                <th>Tracking Number</th>
-                <th>Tracking Status</th>
-                <th>Workflow Status</th>
+                <th>Orden</th>
                 <th>Carrier Name</th>
-                <th>Order ID</th>
-                <th>Quotation ID</th>
+                <th>Tracking Status</th>
+                <th>Status</th>
+                <th>Link</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($data as $tracking)
                 <tr>
-                    <td>{{ $tracking['tracking_number'] }}</td>
+                    <td>{{ $tracking['order_code'] }}</td>
+                    <td>{{ $tracking['carrier'] }}</td>
                     <td>{{ $tracking['tracking_status'] ?? 'N/A' }}</td>
                     <td>{{ $tracking['workflow_status'] ?? 'N/A' }}</td>
-                    <td>{{ $tracking['carrier_name'] ?? 'N/A' }}</td>
-                    <td>{{ $tracking['order_id'] ?? 'N/A' }}</td>
-                    <td>{{ $tracking['quotation_id'] ?? 'N/A' }}</td>
+                    <td>
+                        @if(!empty($tracking['url_tracking']))
+                            <a href="{{ $tracking['url_tracking'] }}" class="btn btn-primary btn-sm" target="_blank">
+                                Open Link
+                            </a>
+                        @else
+                            N/A
+                        @endif
+                    </td>
+
                 </tr>
             @empty
                 <tr>
