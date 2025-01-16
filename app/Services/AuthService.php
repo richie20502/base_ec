@@ -21,7 +21,7 @@ class AuthService
         $this->clientSecret = config('services.skydropx.client_secret');
     }
 
-    
+
     public function getToken(): string
     {
 
@@ -61,7 +61,7 @@ class AuthService
 
     public function createOrder(array $orderData): array
     {
-        $token = $this->getToken(); 
+        $token = $this->getToken();
         $response = $this->client->post($this->authUrl . 'orders/', [
             'headers' => [
                 'Content-Type' => 'application/json',
@@ -95,11 +95,13 @@ class AuthService
         }
     }
 
-    public function getQuotationById()
+    public function getQuotationById($id = null)
     {
-        $quotationId = session('quotation_id'); // Obtener el ID de la sesión
+        $quotationId = $id ?? session('quotation_id'); // Si $id es null, toma el valor de la sesión.
+        if ($id === null) {
+            sleep(5); // Solo se ejecuta si no se proporciona un ID (es decir, $id es null).
+        }
         $token = $this->getToken();
-        sleep(5);
         if (!$quotationId) {
             throw new \Exception('No se encontró un ID de cotización en la sesión.');
         }
@@ -145,7 +147,7 @@ class AuthService
 
     public function trackShipment(string $trackingNumber, string $carrierName): array
     {
-        $token = $this->getToken(); 
+        $token = $this->getToken();
         try {
             $response = $this->client->get($this->authUrl . 'shipments/tracking', [
                 'headers' => [

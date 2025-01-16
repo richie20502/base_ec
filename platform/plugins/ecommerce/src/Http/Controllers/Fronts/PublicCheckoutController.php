@@ -52,6 +52,7 @@ use Illuminate\Validation\ValidationException;
 use Throwable;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\SkydropTrackingController;
+use Illuminate\Support\Facades\Log;
 
 class PublicCheckoutController extends BaseController
 {
@@ -214,7 +215,7 @@ class PublicCheckoutController extends BaseController
             return view($checkoutView, $data);
         }
 
-        
+
 
         return view(
             'plugins/ecommerce::orders.checkout',
@@ -547,7 +548,7 @@ class PublicCheckoutController extends BaseController
         $totalSelection = (float) $request->input('totalSelection', 0);
         $updatedAmount = $amount + $totalSelection;
         $request->merge(['amount' => $updatedAmount]);
-        
+
         abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
         if (! EcommerceHelper::isEnabledGuestCheckout() && ! auth('customer')->check()) {
@@ -577,7 +578,7 @@ class PublicCheckoutController extends BaseController
                 ->setMessage(__('Your shopping cart has digital product(s), so you need to sign in to continue!'));
         }
 
-        $totalQuality = Cart::instance('cart')->rawTotalQuantity(); 
+        $totalQuality = Cart::instance('cart')->rawTotalQuantity();
 
         if (($minimumQuantity = EcommerceHelper::getMinimumOrderQuantity()) > 0
             && $totalQuality < $minimumQuantity) {
@@ -880,16 +881,15 @@ class PublicCheckoutController extends BaseController
                 ->setMessage($paymentData['message'] ?: __('Checkout error!'));
         }
 
-        $trackingController = new TrackingController(); // Instanciar el controlador
-
-        $dataTracking = $trackingController->processRate($request, $products);
-
-        $skydropTrackingController = new SkydropTrackingController();
-
-        $datSkydropTracking = $skydropTrackingController->create($dataTracking, auth('customer')->id(), $order->getKey());
 
 
-        //dd($dataTracking);
+
+        if( $amount < env('AMOUNT_FREE_TRACKING')){
+            $trackingController = new TrackingController();
+            $dataTracking = $trackingController->processRate($request, $products);
+            $skydropTrackingController = new SkydropTrackingController();
+            $datSkydropTracking = $skydropTrackingController->create($dataTracking, auth('customer')->id(), $order->getKey());
+        }
 
 
         return $this
@@ -901,7 +901,7 @@ class PublicCheckoutController extends BaseController
     public function getCheckoutSuccess(string $token)
     {
 
-        
+
         abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
         /**

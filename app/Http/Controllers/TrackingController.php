@@ -297,17 +297,33 @@ class TrackingController extends Controller
                 ->firstWhere('type', 'package')['attributes']['tracking_status'] ?? null;
 
             $workflowStatus = $data['data']['attributes']['workflow_status'] ?? null;
-            $carrierName = $data['data']['attributes']['carrier_name'] ?? null;
+            $carrierNamepaque = $data['data']['attributes']['carrier_name'] ?? null;
 
             $urlTracking = $included
             ->firstWhere('type', 'package')['attributes']['tracking_url_provider'] ?? null;
 
             $order = Order::find( $tracking->order_id);
 
+            $quatitioData = $this->authService->getQuotationById($tracking->quotation_id);
+
+            //dd($quatitioData);
+
+
+            $rates = $quatitioData['rates'];
+            $carrierName = $tracking->carrier_name;
+            $days = null; // Variable para almacenar el valor de days.
+
+            foreach ($rates as $rate) {
+                if ($rate['id'] === $carrierName) {
+                    $days = $rate['days']; // Asignamos el valor de days si coincide.
+                    break; // Salimos del bucle una vez encontrado.
+                }
+            }
+
 
             return [
                 'tracking_number' => $tracking->tracking_number,
-                "carrier" => $carrierName,
+                "carrier" => $carrierNamepaque,
                 "url_tracking" => $urlTracking,
                 "tracking_status" => $trackingStatus,
                 "workflow_status" => $workflowStatus,
@@ -315,9 +331,12 @@ class TrackingController extends Controller
                 'carrier_name' => $tracking->carrier_name,
                 'order_id' => $tracking->order_id,
                 "order_code" => $order->code,
+                "days" => $days,
                 'quotation_id' => $tracking->quotation_id,
             ];
         });
+
+        //dd($jsonData->toArray());
 
         // Convertir la colección en un array basado en índices numéricos
         return response()->json(array_values($jsonData->toArray()), 200);
