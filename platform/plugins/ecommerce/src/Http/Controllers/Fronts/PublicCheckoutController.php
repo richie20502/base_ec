@@ -545,9 +545,14 @@ class PublicCheckoutController extends BaseController
         //dd($request->all());
         //dd(auth('customer')->id());
         $amount = (float) $request->input('amount', 0);
-        $totalSelection = (float) $request->input('totalSelection', 0);
-        $updatedAmount = $amount + $totalSelection;
-        $request->merge(['amount' => $updatedAmount]);
+
+        if( $amount < env('AMOUNT_FREE_TRACKING')){
+            $totalSelection = (float) $request->input('totalSelection', 0);
+            $updatedAmount = $amount + $totalSelection;
+            $request->merge(['amount' => $updatedAmount]);
+        }
+
+
 
         abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
@@ -746,21 +751,37 @@ class PublicCheckoutController extends BaseController
         }
 
         $orderAmount += (float) $shippingAmount;
-
-        $request->merge([
-            'amount' => $orderAmount ?: 0,
-            'currency' => $request->input('currency', strtoupper(get_application_currency()->title)),
-            'user_id' => $currentUserId,
-            'shipping_method' => $isAvailableShipping ? $shippingMethodInput : '',
-            'shipping_option' => $isAvailableShipping ? $request->input('shipping_option') : null,
-            'shipping_amount' => $request->totalSelection,
-            'tax_amount' => Cart::instance('cart')->rawTax(),
-            'sub_total' => Cart::instance('cart')->rawSubTotal(),
-            'coupon_code' => session('applied_coupon_code'),
-            'discount_amount' => $promotionDiscountAmount + $couponDiscountAmount,
-            'status' => OrderStatusEnum::PENDING,
-            'token' => $token,
-        ]);
+        if( $amount < env('AMOUNT_FREE_TRACKING')){
+            $request->merge([
+                'amount' => $orderAmount ?: 0,
+                'currency' => $request->input('currency', strtoupper(get_application_currency()->title)),
+                'user_id' => $currentUserId,
+                'shipping_method' => $isAvailableShipping ? $shippingMethodInput : '',
+                'shipping_option' => $isAvailableShipping ? $request->input('shipping_option') : null,
+                'shipping_amount' => $request->totalSelection,
+                'tax_amount' => Cart::instance('cart')->rawTax(),
+                'sub_total' => Cart::instance('cart')->rawSubTotal(),
+                'coupon_code' => session('applied_coupon_code'),
+                'discount_amount' => $promotionDiscountAmount + $couponDiscountAmount,
+                'status' => OrderStatusEnum::PENDING,
+                'token' => $token,
+            ]);
+        }else{
+            $request->merge([
+                'amount' => $orderAmount ?: 0,
+                'currency' => $request->input('currency', strtoupper(get_application_currency()->title)),
+                'user_id' => $currentUserId,
+                'shipping_method' => $isAvailableShipping ? $shippingMethodInput : '',
+                'shipping_option' => $isAvailableShipping ? $request->input('shipping_option') : null,
+                'shipping_amount' => (float) $shippingAmount,
+                'tax_amount' => Cart::instance('cart')->rawTax(),
+                'sub_total' => Cart::instance('cart')->rawSubTotal(),
+                'coupon_code' => session('applied_coupon_code'),
+                'discount_amount' => $promotionDiscountAmount + $couponDiscountAmount,
+                'status' => OrderStatusEnum::PENDING,
+                'token' => $token,
+            ]);
+        }
 
         /**
          * @var Order $order
@@ -812,6 +833,7 @@ class PublicCheckoutController extends BaseController
             if (! $product) {
                 continue;
             }
+
 
             $data = [
                 'order_id' => $order->getKey(),
@@ -889,6 +911,10 @@ class PublicCheckoutController extends BaseController
             $dataTracking = $trackingController->processRate($request, $products);
             $skydropTrackingController = new SkydropTrackingController();
             $datSkydropTracking = $skydropTrackingController->create($dataTracking, auth('customer')->id(), $order->getKey());
+        }else{
+            $skydropTrackingController = new SkydropTrackingController();
+            $datSkydropTracking = $skydropTrackingController->create_dos(null, auth('customer')->id(), $order->getKey());
+
         }
 
 

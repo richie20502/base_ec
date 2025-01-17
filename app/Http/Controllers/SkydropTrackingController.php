@@ -19,21 +19,36 @@ class SkydropTrackingController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create($dataTracking, $customerId, $order)
-    {   
+    public function create($dataTracking = null, $customerId, $order)
+    {
         Log::info("--------------- INI DATA TRACKING---------------");
         Log::info(json_encode($dataTracking));
         Log::info("--------------- FIN DATA TRACKING---------------");
         $data = json_decode($dataTracking->getContent(), true);
         $tracking = new SkydropTracking();
-        $tracking->customer_id = $customerId;  
+        $tracking->customer_id = $customerId;
         $tracking->tracking_number = $data['shipment_id'];
         $tracking->carrier_name = $data['rate_id'];
-        $tracking->order_id = $order; 
+        $tracking->order_id = $order;
         $tracking->quotation_id = $data['quotation_id'];
         $tracking->save();
-         
+
     }
 
-   
+
+    public function create_dos($dataTracking = null, $customerId, $order)
+    {
+
+
+        $tracking = new SkydropTracking();
+        $tracking->customer_id = $customerId;
+        $tracking->tracking_number = 0;
+        $tracking->carrier_name = 0;
+        $tracking->order_id = $order;
+        $tracking->quotation_id = 0;
+        $tracking->save();
+
+    }
+
+
 }
