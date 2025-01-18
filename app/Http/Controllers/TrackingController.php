@@ -62,7 +62,6 @@ class TrackingController extends Controller
                 'store_id' => $product->store_id,
                 'approved_by' => $product->approved_by
             ];
-
         }
 
 
@@ -113,9 +112,9 @@ class TrackingController extends Controller
                 ],
             ],
         ];
-            Log::info("INI QUOTATION DATA");
-            Log::info($quotationData);
-            Log::info("FIN QUOTATION DATA");
+        Log::info("INI QUOTATION DATA");
+        Log::info($quotationData);
+        Log::info("FIN QUOTATION DATA");
         try {
             $response = $this->authService->createQuotation($quotationData);
 
@@ -136,17 +135,14 @@ class TrackingController extends Controller
                 'message' => 'Quotation created successfully.',
                 'data' => $responseDataQuotation,
             ], 200);
-
-
-
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
-
     }
 
 
-    public function processRate (Request $request, $products){
+    public function processRate(Request $request, $products)
+    {
         //dd($products);
         //dd($request->all());
 
@@ -157,11 +153,11 @@ class TrackingController extends Controller
                 'name' => $product->name, //si
                 'description' => $product->description, //si
                 'quantity' => 1, //si seteado con uno ahorita
-                'price' => $product->price,// si va
+                'price' => $product->price, // si va
                 'sale_price' => $product->sale_price, //si
-                "hs_code"=> "1234567890",
-                'product_type_code'=> "P",
-                'product_type_name'=> "Producto",
+                "hs_code" => "1234567890",
+                'product_type_code' => "P",
+                'product_type_name' => "Producto",
                 'country_code' => 'MX',
                 'weight' => $product->weight, //si
                 'weight_unit' => $product->weight,
@@ -176,7 +172,7 @@ class TrackingController extends Controller
         $company = "Zensara";
 
         if (isset($request->address['address_id'])) {
-            if($request->address['address_id'] == 'new'){
+            if ($request->address['address_id'] == 'new') {
                 $name = $request->address['name'];
                 $email = $request->address['email'];
                 $phone = $request->address['phone'];
@@ -187,8 +183,7 @@ class TrackingController extends Controller
                 $district = $request->address['country'];;
                 $city = $request->address['city'];
                 $state = $request->address['state'];
-
-            }else{
+            } else {
 
                 $add = Address::find($request->address['address_id']);
                 $name = $add->name;
@@ -201,10 +196,8 @@ class TrackingController extends Controller
                 $district =  $add->country;
                 $city =  $add->city;
                 $state =  $add->state;
-
             }
-
-        }else{
+        } else {
             $name = $request->address['name'];
             $email = $request->address['email'];
             $phone = $request->address['phone'];
@@ -250,20 +243,20 @@ class TrackingController extends Controller
                     'email' => env('ADDRESS_EMAIL'),
                 ],
                 "address_to" => [
-                    "country_code"=> "mx",
-                    "postal_code"=> $postalCode,
-                    "area_level1"=> $state,
-                    "area_level2"=>  $city,
-                    "area_level3"=> $street,
-                    "street1"=> $street,
-                    "name"=> $name,
-                    "company"=> $company,
-                    "phone"=> $phone,
-                    "email"=> $email,
-                    "reference"=> $reference
+                    "country_code" => "mx",
+                    "postal_code" => $postalCode,
+                    "area_level1" => $state,
+                    "area_level2" =>  $city,
+                    "area_level3" => $street,
+                    "street1" => $street,
+                    "name" => $name,
+                    "company" => $company,
+                    "phone" => $phone,
+                    "email" => $email,
+                    "reference" => $reference
                 ],
-                "consignment_note"=> "53102400",
-                "package_type"=> "4G",
+                "consignment_note" => "53102400",
+                "package_type" => "4G",
                 "products" => $productArray
             ],
         ];
@@ -276,8 +269,6 @@ class TrackingController extends Controller
             'rate_id' => $rateId,
             'quotation_id' => $quotationId,
         ]);
-
-
     }
 
 
@@ -287,38 +278,54 @@ class TrackingController extends Controller
         $trackings = SkydropTracking::where('customer_id', $authCustomer)->get();
 
         $jsonData = $trackings->map(function ($tracking) {
-            $data = $this->authService->getShipmentById($tracking->tracking_number);
 
-            $shipmentData = $data['data'] ?? [];
-            $attributes = $shipmentData['attributes'] ?? [];
-            $included = collect($data['included'] ?? []);
+            if ( $tracking->tracking_number == 0) {
+                $carrierNamepaque = "N/A";
+                $urlTracking = "N/A";
+                $trackingStatus = "N/A";
+                $workflowStatus = "N/A";
+                $days ="N/A";
+                $order = Order::find($tracking->order_id);
 
-            $trackingStatus = $included
-                ->firstWhere('type', 'package')['attributes']['tracking_status'] ?? null;
+            } else {
 
-            $workflowStatus = $data['data']['attributes']['workflow_status'] ?? null;
-            $carrierNamepaque = $data['data']['attributes']['carrier_name'] ?? null;
+                $data = $this->authService->getShipmentById($tracking->tracking_number);
 
-            $urlTracking = $included
-            ->firstWhere('type', 'package')['attributes']['tracking_url_provider'] ?? null;
+                $shipmentData = $data['data'] ?? [];
+                $attributes = $shipmentData['attributes'] ?? [];
+                $included = collect($data['included'] ?? []);
 
-            $order = Order::find( $tracking->order_id);
+                $trackingStatus = $included
+                    ->firstWhere('type', 'package')['attributes']['tracking_status'] ?? null;
 
-            $quatitioData = $this->authService->getQuotationById($tracking->quotation_id);
+                $workflowStatus = $data['data']['attributes']['workflow_status'] ?? null;
+                $carrierNamepaque = $data['data']['attributes']['carrier_name'] ?? null;
 
-            //dd($quatitioData);
+                $urlTracking = $included
+                    ->firstWhere('type', 'package')['attributes']['tracking_url_provider'] ?? null;
+
+                $order = Order::find($tracking->order_id);
+
+                $quatitioData = $this->authService->getQuotationById($tracking->quotation_id);
+
+                //dd($quatitioData);
 
 
-            $rates = $quatitioData['rates'];
-            $carrierName = $tracking->carrier_name;
-            $days = null; // Variable para almacenar el valor de days.
+                $rates = $quatitioData['rates'];
+                $carrierName = $tracking->carrier_name;
+                $days = null; // Variable para almacenar el valor de days.
 
-            foreach ($rates as $rate) {
-                if ($rate['id'] === $carrierName) {
-                    $days = $rate['days']; // Asignamos el valor de days si coincide.
-                    break; // Salimos del bucle una vez encontrado.
+                foreach ($rates as $rate) {
+                    if ($rate['id'] === $carrierName) {
+                        $days = $rate['days']; // Asignamos el valor de days si coincide.
+                        break; // Salimos del bucle una vez encontrado.
+                    }
                 }
+                $days = $days." Days";
             }
+
+
+
 
 
             return [

@@ -2,6 +2,7 @@
 
 return [
     'name' => 'Clientes',
+    'tracking'=> 'Envios pendientes',
     'create' => 'Crear',
     'edit' => 'Editar ":name"',
     'email' => 'Correo',

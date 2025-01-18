@@ -21,7 +21,7 @@
                     <td>{{ $tracking['carrier'] }}</td>
                     <td>{{ $tracking['tracking_status'] ?? 'N/A' }}</td>
                     <td>{{ $tracking['workflow_status'] ?? 'N/A' }}</td>
-                    <td>{{ $tracking['days']. " Days" ?? 'N/A' }}</td>
+                    <td>{{ $tracking['days'] ?? 'N/A' }}</td>
                     <td>
                         @if(!empty($tracking['url_tracking']))
                             <a href="{{ $tracking['url_tracking'] }}" class="btn btn-primary btn-sm" target="_blank">

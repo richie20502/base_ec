@@ -874,6 +874,15 @@ class EcommerceServiceProvider extends ServiceProvider
                     'url' => fn () => route('customers.index'),
                     'permissions' => ['customers.index'],
                 ])
+                ->registerItem([
+                    'id' => 'cms-plugins-ecommerce-tracking',
+                    'priority' => 200,
+                    'parent_id' => 'cms-plugins-ecommerce',
+                    'name' => 'plugins/ecommerce::customer.tracking',
+                    'icon' => 'ti ti-truck-loading',
+                    'url' => fn () => route('customers.index'),
+                    'permissions' => ['customers.index'],
+                ])
                 ->when(EcommerceHelper::isProductSpecificationEnabled(), function (DashboardMenuSupport $dashboardMenu): void {
                     $dashboardMenu
                         ->registerItem([
