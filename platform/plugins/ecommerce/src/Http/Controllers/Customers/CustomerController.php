@@ -217,4 +217,12 @@ class CustomerController extends BaseController
     {
         return $customerReviewTable->customerId($id)->renderTable();
     }
+
+
+    public function getPending(CustomerTable $dataTable){
+
+        $this->pageTitle(trans('plugins/ecommerce::customer.tracking'));
+        return $dataTable->renderTable();
+        dd("Prueba");
+    }
 }

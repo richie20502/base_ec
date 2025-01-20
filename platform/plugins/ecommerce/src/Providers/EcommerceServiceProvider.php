@@ -880,7 +880,7 @@ class EcommerceServiceProvider extends ServiceProvider
                     'parent_id' => 'cms-plugins-ecommerce',
                     'name' => 'plugins/ecommerce::customer.tracking',
                     'icon' => 'ti ti-truck-loading',
-                    'url' => fn () => route('customers.index'),
+                    'url' => fn () => route('customers.customers-pending'),
                     'permissions' => ['customers.index'],
                 ])
                 ->when(EcommerceHelper::isProductSpecificationEnabled(), function (DashboardMenuSupport $dashboardMenu): void {

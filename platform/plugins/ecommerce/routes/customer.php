@@ -28,6 +28,8 @@ AdminHelper::registerRoutes(
                     'permission' => 'customers.index',
                 ]);
 
+
+
                 Route::get('get-list-customers-for-search', [
                     'as' => 'get-list-customers-for-search',
                     'uses' => 'CustomerController@getListCustomerForSearch',
@@ -45,6 +47,14 @@ AdminHelper::registerRoutes(
                     'uses' => 'CustomerController@getCustomerAddresses',
                     'permission' => ['customers.index', 'orders.index'],
                 ])->wherePrimaryKey();
+
+                    /** PEndiente */
+                Route::get('pending', [
+                    'as' => 'customers-pending',
+                    'uses' => 'CustomerController@getPending',
+                    'permission' => ['customers.pending'],
+                ])->wherePrimaryKey();
+
 
                 Route::get('get-customer-order-numbers/{id}', [
                     'as' => 'get-customer-order-numbers',
