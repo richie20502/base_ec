@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('skydrop_trackings', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('customer_id');  // Cambiado a unsignedBigInteger
-            $table->string('tracking_number');
-            $table->string('carrier_name');
+            $table->string('tracking_number')->nullable();
+            $table->string('carrier_name')->nullable();
             $table->unsignedBigInteger('order_id');  // Cambiado a unsignedBigInteger
             $table->timestamps();
         });
