@@ -18,11 +18,13 @@ use Botble\Ecommerce\Http\Resources\CustomerAddressResource;
 use Botble\Ecommerce\Models\Address;
 use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Tables\CustomerReviewTable;
+use Botble\Ecommerce\Tables\OrderPendingTable;
 use Botble\Ecommerce\Tables\CustomerTable;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\SkydropTracking;
 
 class CustomerController extends BaseController
 {
@@ -219,10 +221,14 @@ class CustomerController extends BaseController
     }
 
 
-    public function getPending(CustomerTable $dataTable){
+    public function getPending(OrderPendingTable $dataTable){
 
         $this->pageTitle(trans('plugins/ecommerce::customer.tracking'));
-        return $dataTable->renderTable();
-        dd("Prueba");
+        $dataSky = SkydropTracking::where('carrier_name', 0)
+        ->where('quotation_id', 0)
+        ->where('tracking_number', 0)
+        ->get();
+
+        return view('core/base::system.order_sky',compact('dataSky', ));
     }
 }

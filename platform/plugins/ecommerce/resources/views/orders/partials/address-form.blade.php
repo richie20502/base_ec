@@ -582,7 +582,7 @@
             <span id="toggle-icon" class="me-2">+</span>{{ __('Cotizador Envío') }}
         </button>
         <div id="additional-info-content" class="p-3 border rounded mt-2 d-none bg-light">
-            <div id="quote-content">
+            <div id="quote-content" class='container-rates'>
                 <p id="quote-message" class="text-info">{{ __('Your shipping quote will appear here.') }}</p>
             </div>
             <div id="additional-checkboxes"></div>
@@ -854,6 +854,7 @@
                 return;
             }
 
+            console.log(rates);
             availableRates.forEach((rate, index) => {
                 const rateCard = document.createElement('div');
                 rateCard.className = 'mb-3 border p-3 rounded bg-white d-flex align-items-center';
@@ -863,17 +864,32 @@
                 const totalCheckboxId = `total-${rate.id}`;
 
                 rateCard.innerHTML = `
-            <div class="form-check me-3">
-                <input class="form-check-input rate-selection" type="checkbox" id="${checkboxId}" name="rateSelection" value="${rate.id}">
-                <input type="checkbox" id="${linkedCheckboxId}" class="linked-checkbox d-none" name="quoteSelection" value="${id}">
-                <input type="checkbox" id="${totalCheckboxId}" class="total-checkbox d-none" name="totalSelection" value="${rate.amount}">
-            </div>
-            <div>
-                <h5 style="color: #93C47D;">${rate.provider_name}</h5>
-                <p><strong>Días:</strong> ${rate.days ?? 'No especificado'}</p>
-                <p><strong>Precio:</strong> ${rate.amount ?? 'No disponible'}</p>
-            </div>
-        `;
+                    <div class="rate-card d-flex align-items-center p-3 border rounded shadow-sm me-3 mb-3" style="background-color: #f9f9f9; width: 300px;">
+                        <div class="me-3">
+                            ${
+                                rate.provider_name.toLowerCase() === 'fedex'
+                                    ? `<img src="/themes/farmart/images/rates/fedex.png" alt="FedEx" style="width: 50px; height: auto;">`
+                                    : rate.provider_name.toLowerCase() === 'dhl'
+                                    ? `<img src="/themes/farmart/images/rates/dhl.png" alt="DHL" style="width: 50px; height: auto;">`
+                                    : rate.provider_name.toLowerCase() === 'paquetexpress'
+                                    ? `<img src="/themes/farmart/images/rates/paquetexpress.png" alt="Paquetexpress" style="width: 50px; height: auto;">`
+                                    : rate.provider_name.toLowerCase() === 'sendex'
+                                    ? `<img src="/themes/farmart/images/rates/sendex.png" alt="Sendex" style="width: 50px; height: auto;">`
+                                    : ''
+                            }
+                        </div>
+                        <div class="rate-details flex-grow-1">
+                            <h5 class="mb-2" style="color: #93C47D; font-weight: bold; text-transform: capitalize;">${rate.provider_name}</h5>
+                            <p class="mb-1"><strong>Días:</strong> ${rate.days ?? 'No especificado'}</p>
+                            <p class="mb-0"><strong>Precio:</strong> $${rate.amount}</p>
+                        </div>
+                        <div class="form-check ms-3">
+                            <input class="form-check-input rate-selection" type="checkbox" id="${checkboxId}" name="rateSelection" value="${rate.id}">
+                            <input type="checkbox" id="${linkedCheckboxId}" class="linked-checkbox d-none" name="quoteSelection" value="${id}">
+                            <input type="checkbox" id="${totalCheckboxId}" class="total-checkbox d-none" name="totalSelection" value="${rate.amount}">
+                        </div>
+                    </div>
+                `;
 
 
                 const mainCheckbox = rateCard.querySelector(`#${checkboxId}`);
@@ -1039,6 +1055,13 @@
 
         .text-success {
             color: #93C47D;
+        }
+
+        .container-rates{
+            display: flex;
+            flex-wrap: wrap; /* Permite que los elementos se ajusten a la siguiente línea si no hay espacio */
+            gap: 10px; /* Espacio entre los elementos */
+            justify-content: flex-start; /* Alinea los elementos al inicio */
         }
 
         @keyframes fadeIn {

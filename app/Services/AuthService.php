@@ -168,6 +168,7 @@ class AuthService
     public function getShipmentById(string $shipmentId): array
     {
         $token = $this->getToken();
+        sleep(2);
         try {
             $response = $this->client->get($this->authUrl . 'shipments/' . $shipmentId, [
                 'headers' => [

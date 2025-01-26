@@ -11,7 +11,8 @@
                 <th>Tracking Status</th>
                 <th>Status</th>
                 <th>Days</th>
-                <th>Link</th>
+                <th>Tracking</th>
+                <th>Details</th>
             </tr>
         </thead>
         <tbody>
@@ -25,11 +26,16 @@
                     <td>
                         @if(!empty($tracking['url_tracking']))
                             <a href="{{ $tracking['url_tracking'] }}" class="btn btn-primary btn-sm" target="_blank">
-                                Open Link
+                                Rastrear
                             </a>
                         @else
                             N/A
                         @endif
+                    </td>
+                    <td>
+                        <a href="#" class="btn btn-primary btn-sm" target="_blank">
+                            Detalle
+                        </a>
                     </td>
 
                 </tr>

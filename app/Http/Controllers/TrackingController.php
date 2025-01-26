@@ -7,8 +7,11 @@ use Illuminate\Support\Facades\Log;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\Address;
 use Botble\Ecommerce\Models\Order;
+use Botble\Ecommerce\Models\OrderAddress;
 use App\Services\AuthService;
 use App\Models\SkydropTracking;
+
+use Botble\Ecommerce\Models\OrderProduct;
 
 class TrackingController extends Controller
 {
@@ -108,7 +111,7 @@ class TrackingController extends Controller
                     'sendex',
                     'quiken',
                     #'ninetynineminutes',
-                    'jtexpress',
+                    #'jtexpress',
                 ],
             ],
         ];
@@ -347,5 +350,210 @@ class TrackingController extends Controller
 
         // Convertir la colección en un array basado en índices numéricos
         return response()->json(array_values($jsonData->toArray()), 200);
+    }
+
+
+    public function quotationAdmin(Request $request){
+        $orderId = $request->input('order_id');
+        $orderAddress = OrderAddress::where('order_id', $orderId)->first();
+        $name = $orderAddress->name;
+        $phone = $orderAddress->phone;
+        $email = $orderAddress->email;
+        $country = $orderAddress->country;
+        $state = $orderAddress->state;
+        $city = $orderAddress->city;
+        $address = $orderAddress->address;
+        $order_id = $orderAddress->order_id;
+        $zip_code = $orderAddress->zip_code;
+
+
+        $quotationData = [
+            'quotation' => [
+                'address_from' => [
+                    'country_code' => env('ADDRESS_COUNTRY_CODE'), // Valor por defecto
+                    'postal_code' => env('ADDRESS_POSTAL_CODE'),
+                    'area_level1' => env('ADDRESS_AREA_LEVEL1'),
+                    'area_level2' => env('ADDRESS_AREA_LEVEL2'),
+                    'area_level3' => env('ADDRESS_AREA_LEVEL3'),
+                    'street1' => env('ADDRESS_STREET1'),
+                    'apartment_number' => env('ADDRESS_APARTMENT_NUMBER'), // Puede ser nulo
+                    'reference' => env('ADDRESS_REFERENCE'),
+                    'name' => env('ADDRESS_NAME'),
+                    'company' => env('ADDRESS_COMPANY'),
+                    'phone' => env('ADDRESS_PHONE'),
+                    'email' => env('ADDRESS_EMAIL'),
+                ],
+                'address_to' => [
+                    'country_code' => 'mx',
+                    'postal_code' => $zip_code,
+                    'area_level1' => $city,
+                    'area_level2' => $state,
+                    'area_level3' => 'Monterrey Centro',
+                    'street1' => $address,
+                    #'apartment_number' => '3a',
+                    'reference' => "referencia",
+                    'name' => $name,
+                    'company' => "",
+                    'phone' => $phone,
+                    'email' => $email,
+                ],
+                'parcel' => [
+                    'length' => 10,
+                    'width' => 10,
+                    'height' => 10,
+                    'weight' => 1,
+                ],
+                'requested_carriers' => [
+                    'fedex',
+                    'dhl',
+                    'paquetexpress',
+                    'sendex',
+                    'quiken',
+                    #'ninetynineminutes',
+                    #'jtexpress',
+                ],
+            ],
+        ];
+
+        Log::info("INI QUOTATION DATA");
+        Log::info($quotationData);
+        Log::info("FIN QUOTATION DATA");
+        try {
+            $response = $this->authService->createQuotation($quotationData);
+
+
+            session()->forget('quotation_id');
+            if (isset($response['id'])) {
+                session(['quotation_id' => $response['id']]);
+            }
+
+            $responseDataQuotation = $this->authService->getQuotationById();
+            Log::info(session('quotation_id'));
+            Log::info("INI RESPONSE QUOTATION");
+            Log::info($responseDataQuotation);
+            Log::info("FIN RESPONSE QUOTATION");
+            if (isset($responseDataQuotation['rates']) && is_array($responseDataQuotation['rates'])) {
+                $filteredRates = collect($responseDataQuotation['rates'])
+                    ->filter(function ($rate) {
+                        return isset($rate['total']) && is_numeric($rate['total']);
+                    })
+                    ->sortBy('total')
+                    ->values()
+                    ->toArray();
+
+                $responseDataQuotation['rates'] = $filteredRates;
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Quotation created successfully.',
+                'data' => $responseDataQuotation,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+
+    }
+
+    public function processRateAdmin(Request $request){
+        //dd($request->all());
+        $rateId = $request->rate_id;
+        $providerName = $request->provider_name;
+        $total = $request->total;
+        $quotationId = $request->quotation_id ;
+        $trackingId = $request->tracking_id ;
+        $orderId = $request->order_id;
+
+        $orderPro = OrderProduct::where('order_id', $orderId)->get();
+        //dd($orderPro);
+
+        $productArray = []; // Inicializa un array vacío
+        foreach ($orderPro as $product) {
+            // Agrega cada producto al array
+            $productArray[] = [
+                'name' => $product->product_name, //si
+                'description' => $product->product_name, //si
+                'quantity' => $product->qty, //si seteado con uno ahorita
+                'price' => $product->price, // si va
+                'sale_price' => $product->price, //si
+                "hs_code" => "1234567890",
+                'product_type_code' => "P",
+                'product_type_name' => "Producto",
+                'country_code' => 'MX',
+                'weight' => $product->weight, //si
+                'weight_unit' => $product->weight,
+            ];
+        }
+
+        $orderAddress = OrderAddress::where('order_id', $orderId)->first();
+        $name = $orderAddress->name;
+        $phone = $orderAddress->phone;
+        $email = $orderAddress->email;
+        $country = $orderAddress->country;
+        $state = $orderAddress->state;
+        $city = $orderAddress->city;
+        $address = $orderAddress->address;
+        $order_id = $orderAddress->order_id;
+        $zip_code = $orderAddress->zip_code;
+
+        $reference = "referencias";
+        $company = "Zensara";
+
+        $data_shipment = [
+            'shipment' => [
+                'quotation_id' => $quotationId,
+                'rate_id' => $rateId,
+                'protected' => true,
+                'declared_value' => 1400,
+                'printing_format' => "thermal",
+                "address_from" => [
+                    'country_code' => env('ADDRESS_COUNTRY_CODE'),
+                    'postal_code' => env('ADDRESS_POSTAL_CODE'),
+                    'area_level1' => env('ADDRESS_AREA_LEVEL1'),
+                    'area_level2' => env('ADDRESS_AREA_LEVEL2'),
+                    'area_level3' => env('ADDRESS_AREA_LEVEL3'),
+                    'street1' => env('ADDRESS_STREET1'),
+                    'apartment_number' => env('ADDRESS_APARTMENT_NUMBER'),
+                    'reference' => env('ADDRESS_REFERENCE'),
+                    'name' => env('ADDRESS_NAME'),
+                    'company' => env('ADDRESS_COMPANY'),
+                    'phone' => env('ADDRESS_PHONE'),
+                    'email' => env('ADDRESS_EMAIL'),
+                ],
+                "address_to" => [
+                    "country_code" => "mx",
+                    "postal_code" => $zip_code,
+                    "area_level1" => $state,
+                    "area_level2" =>  $city,
+                    "area_level3" => $address,
+                    "street1" => $address,
+                    "name" => $name,
+                    "company" => $company,
+                    "phone" => $phone,
+                    "email" => $email,
+                    "reference" => $reference
+                ],
+                "consignment_note" => "53102400",
+                "package_type" => "4G",
+                "products" => $productArray
+            ],
+        ];
+
+        $response = $this->authService->createShipment($data_shipment);
+        $skydrop = SkydropTracking::find($trackingId);
+        $skydrop->tracking_number = $response['data']['id'];
+        $skydrop->carrier_name = $rateId;
+        $skydrop->quotation_id = $quotationId;
+        $skydrop->save();
+
+        return response()->json([
+            'message' => 'Tarifa seleccionada correctamente.',
+            'shipment_id' => $response['data']['id'],
+            'rate_id' => $rateId,
+            'quotation_id' => $quotationId,
+        ]);
+
+
+
     }
 }
