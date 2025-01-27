@@ -573,6 +573,12 @@
 
     <!-- fin Form products -->
 
+    @php
+        $user = auth()->user();
+        $roleId = $user ? $user->getRoleId() : null; // Obtener el ID del rol asignado al usuario
+    @endphp
+
+    @if ($roleId != 3)
 
 
     <!-- AQUI -->
@@ -1077,6 +1083,7 @@
         }
     </style>
     <!-- AQUI -->
+    @endif
     @if (!auth('customer')->check())
         <div id="register-an-account-wrapper">
             <div class="mb-3 form-group">

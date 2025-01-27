@@ -26,6 +26,8 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Throwable;
+use Illuminate\Support\Facades\DB;
+
 
 class User extends BaseModel implements
     HasPermissionsContract,
@@ -195,5 +197,13 @@ class User extends BaseModel implements
         }
 
         return parent::delete();
+    }
+
+    public function getRoleId(): ?int
+    {
+        // Obtener el ID del rol del usuario directamente desde la tabla role_users
+        return DB::table('role_users')
+            ->where('user_id', $this->id)
+            ->value('role_id');
     }
 }
