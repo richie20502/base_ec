@@ -17,6 +17,7 @@ use Botble\Ecommerce\Http\Requests\SaveCheckoutInformationRequest;
 use Botble\Theme\FormFront;
 use Closure;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class CheckoutForm extends FormFront
 {
@@ -25,7 +26,17 @@ class CheckoutForm extends FormFront
         $model = $this->getModel();
         $token = $model['token'];
 
-        //dd($model);
+        
+
+        $stores = DB::table('ec_store_locators')
+            ->select('id', 'name', 'phone', 'address', 'city') 
+            ->get()
+            ->toArray();
+
+        // Agrega las tiendas al modelo
+        $model['stores'] = $stores;
+
+
 
         $this
             ->contentOnly()

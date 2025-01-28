@@ -1,4 +1,3 @@
-
 @if($rawTotal > env('AMOUNT_FREE_TRACKING'))
 
 <div class="customer-address-payment-form">
@@ -570,6 +569,97 @@
             </div>
         @endforeach
     </div>
+
+
+    <!-- INICIA TIENDAS -->
+    <div id="store-info-wrapper" class="mb-3">
+        <button type="button" id="toggle-store-info" class="btn btn-secondary w-100 text-start">
+            <span id="toggle-store-icon" class="me-2">+</span>{{ __('Seleccionar Tienda') }}
+        </button>
+        <div id="store-info-content" class="p-3 border rounded mt-2 d-none bg-light">
+            <div id="store-quote-content" class="container-rates">
+                @foreach ($stores as $store)
+                    <div class="store-card d-flex align-items-center p-3 border rounded shadow-sm me-3 mb-3" style="background-color: #f9f9f9; width: 300px;">
+                        <div class="form-check me-3">
+                            <input class="form-check-input store-selection" type="radio" name="store_id" id="store{{ $store->id }}" value="{{ $store->id }}">
+                        </div>
+                        <div class="store-details flex-grow-1">
+                            <h5 class="mb-2" style="color: #93C47D; font-weight: bold;">{{ $store->name }}</h5>
+                            <p class="mb-1"><strong>{{ __('Teléfono:') }}</strong> {{ $store->phone }}</p>
+                            <p class="mb-1"><strong>{{ __('Dirección:') }}</strong> {{ $store->address }}</p>
+                            <p class="mb-0"><strong>{{ __('Ciudad:') }}</strong> {{ $store->city }}</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#toggle-store-info').on('click', function () {
+                $('#store-info-content').toggleClass('d-none');
+                const isHidden = $('#store-info-content').hasClass('d-none');
+                $('#toggle-store-icon').text(isHidden ? '+' : '-');
+            });
+
+            // Asegúrate de que un checkbox esté seleccionado antes de enviar el formulario
+            $('#checkout-form').on('submit', function (e) {
+                if (!$('input[name="store_id"]:checked').val()) {
+                    e.preventDefault();
+                    alert('Por favor selecciona una tienda.');
+                }
+            });
+        });
+    </script>
+
+    <style>
+        #toggle-store-info {
+            font-weight: bold;
+            border: none;
+            background: #6C757D;
+            color: white;
+            border-radius: 5px;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        #toggle-store-info:hover {
+            background: #5A6268;
+            transform: scale(1.02);
+        }
+
+        .container-rates {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-start;
+        }
+
+        .store-card {
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        .store-card h5 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .store-card p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+    </style>
+
+
+
+
+
+
+    <!-- FINALIZA TIENDAS -->
 
     <!-- fin Form products -->
 
